@@ -8,15 +8,15 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Navbar scroll efekti düzeltmesi
-window.addEventListener('scroll', function() {
-    const header = document.querySelector('.main-header');
-    if (window.scrollY > 50) {
-        header.style.background = 'rgba(43, 43, 43, 0.95)';
-    } else {
-        header.style.background = 'var(--nav-bg)';
-    }
-});
+// Navbar scroll efekti kaldırıldı
+// window.addEventListener('scroll', function() {
+//     const header = document.querySelector('.main-header');
+//     if (window.scrollY > 50) {
+//         header.style.background = 'rgba(43, 43, 43, 0.95)';
+//     } else {
+//         header.style.background = 'var(--nav-bg)';
+//     }
+// });
 
 // Sayı animasyonu düzeltmesi
 function animateNumbers() {

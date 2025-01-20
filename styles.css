@@ -26,22 +26,26 @@ body {
 }
 
 .hero {
+    position: relative;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
-    padding: 2rem;
+    padding: 2rem 2rem 0rem 2rem;
     min-height: 85vh;
     align-items: center;
-    background: var(--bg-color);
+    background: transparent;
 }
 
 .hero-content {
     position: relative;
     z-index: 2;
+    padding-left: 10%;
+    align-self: start;
+    padding-top: 8rem;
 }
 
 .hero-text {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
 }
 
 .hero-text h1 {
@@ -73,20 +77,22 @@ body {
 
 .hero::before {
     content: '';
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 200vh;
     background: 
         radial-gradient(circle at 10% 10%, rgba(252, 128, 29, 0.1), transparent 40%),
-        radial-gradient(circle at 90% 90%, rgba(29, 138, 252, 0.1), transparent 40%);
+        radial-gradient(circle at 90% 90%, rgba(29, 138, 252, 0.15), transparent 60%);
     pointer-events: none;
+    z-index: 1;
 }
 
 .hero-visual {
     position: relative;
     z-index: 2;
+    align-self: center;
 }
 
 .code-window {
@@ -94,10 +100,11 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 6px;
     overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
-                0 0 80px rgba(255, 77, 77, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     transform: perspective(1000px) rotateY(-5deg);
     transition: transform 0.3s ease;
+    width: 75%;
+    margin: 0 auto;
 }
 
 .code-window:hover {
@@ -127,9 +134,10 @@ body {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.9rem;
     line-height: 1.5;
-    background: #1E1F26;
+    background: var(--code-bg);
     height: 300px;
     overflow: hidden;
+    position: relative;
 }
 
 .code-content pre {
@@ -394,14 +402,13 @@ body {
 
 /* Navbar düzeltmesi */
 .main-header {
-    position: fixed;
+    position: absolute;
     width: 100%;
     top: 0;
-    z-index: 1000;
-    background: var(--nav-bg);
-    transition: background 0.3s ease;
-    border-bottom: 1px solid var(--border-color);
-    height: 60px;
+    left: 0;
+    z-index: 100;
+    padding: 1rem 0;
+    background: transparent;
 }
 
 .nav-container {
@@ -508,67 +515,86 @@ footer {
     font-size: 0.9rem;
 }
 
-/* Products section styles */
+/* Products section yeni stil */
 .products {
-    padding: 4rem;
-    background: var(--bg-color);
-}
-
-.section-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 2rem;
+    padding: 0rem 2rem 4rem 2rem;
+    background: transparent;
+    position: relative;
+    z-index: 2;
 }
 
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 2rem;
-    margin-top: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0;
 }
 
 .product-card {
     background: var(--nav-bg);
-    border-radius: 12px;
-    padding: 2rem;
-    text-align: center;
+    border-radius: 8px;
+    overflow: hidden;
     transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+    position: relative;
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    border-color: var(--primary);
 }
 
 .product-card img {
     width: 100%;
-    max-width: 300px;
-    height: auto;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    transition: transform 0.3s ease;
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.product-card:hover img {
-    transform: translateY(-5px);
+.product-info {
+    padding: 1.5rem;
 }
 
-.app-links {
+.product-info h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.product-info p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.product-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.product-stats {
     display: flex;
     gap: 1rem;
-    justify-content: center;
-    margin-top: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
 }
 
-.app-store, .play-store {
+.stat {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-color);
-    text-decoration: none;
-    transition: background 0.3s ease;
 }
 
-.app-store:hover, .play-store:hover {
-    background: rgba(255, 255, 255, 0.2);
+.stat i {
+    font-size: 1rem;
+    color: var(--primary);
 }
 
 /* Kod pencereleri için z-index düzenlemesi */
@@ -582,22 +608,23 @@ footer {
 
 .side-window {
     position: absolute;
-    width: 300px;
+    width: 250px;
     opacity: 0;
     z-index: 2;
 }
 
 .top-left {
     top: -20%;
-    left: -30%;
+    left: -20%;
     transform: perspective(1000px) rotateY(-8deg) translateX(-50px);
     animation: slideInTopLeft 0.8s ease forwards;
     animation-delay: 0.6s;
+    z-index: -1 !important;
 }
 
 .bottom-left {
     bottom: -20%;
-    left: -25%;
+    left: -15%;
     transform: perspective(1000px) rotateY(-8deg) translateX(-50px);
     animation: slideInBottomLeft 0.8s ease forwards;
     animation-delay: 0.9s;
@@ -606,12 +633,17 @@ footer {
 /* Yanıp sönen imleç animasyonu */
 .cursor {
     position: absolute;
-    right: 20px;
-    bottom: 20px;
+    display: inline-block;
     width: 2px;
     height: 16px;
     background-color: var(--text-color);
     animation: blink 1s step-end infinite;
+    margin-left: 2px;
+    vertical-align: middle;
+    position: relative;
+    top: 0;
+    right: auto;
+    bottom: auto;
 }
 
 @keyframes blink {
@@ -679,4 +711,49 @@ footer {
 
 .small-window {
     height: 150px; /* Yan pencereler için küçük yükseklik */
+}
+
+.small-window .code-content code {
+    display: inline-block; /* Cursor'ın doğru konumlanması için */
+}
+
+.small-window .cursor {
+    display: inline-block;
+    position: static; /* Absolute yerine static */
+}
+
+/* Section container'ların z-index'i */
+.section-container {
+    position: relative;
+    z-index: 2;
+}
+
+/* Pattern arka planı düzenlemesi */
+.pattern-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(85vh + 4rem + 60vh); /* Hero section + padding + products section'ın bir kısmı */
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.1;
+    background-image: 
+        radial-gradient(circle at 50% 50%, var(--text-secondary) 1px, transparent 1px),
+        linear-gradient(90deg, var(--text-secondary) 0.5px, transparent 0.5px),
+        linear-gradient(var(--text-secondary) 0.5px, transparent 0.5px);
+    background-size: 
+        24px 24px,
+        12px 12px,
+        12px 12px;
+    background-position: 
+        0 0,
+        0 0,
+        0 0;
+    mask-image: radial-gradient(ellipse at center, black 40%, transparent 70%),
+                linear-gradient(to bottom, black 90%, transparent 100%); /* Alt kısımda yumuşak geçiş */
+    -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 70%),
+                        linear-gradient(to bottom, black 90%, transparent 100%);
+    mask-composite: intersect;
+    -webkit-mask-composite: source-in;
 } 
