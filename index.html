@@ -9,12 +9,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
 </head>
 <body>
     <header class="main-header">
         <nav class="nav-container">
             <div class="logo">
-                <img src="assets/logo.png" alt="Göktigin Bilişim Logo">
+                <img src="https://placehold.co/150x35/47cf73/ffffff?text=Göktigin" alt="Göktigin Logo">
             </div>
             <div class="nav-links">
                 <a href="#about">Hakkımızda</a>
@@ -29,10 +31,10 @@
             <div class="hero-content">
                 <div class="hero-text">
                     <h1>
-                        <span class="gradient-text">Göktigin</span>
-                        <span class="subtitle">Yazılım Dünyasının Geleceğini Şekillendiriyoruz</span>
+                        <span class="gradient-text">Build, Test, and Discover</span>
+                        <span class="subtitle">The best place to build and deploy your code</span>
                     </h1>
-                    <p>Mobil teknolojiler ve yapay zeka çözümleriyle işletmeleri geleceğe taşıyoruz</p>
+                    <p>A social development environment for front-end designers and developers.</p>
                 </div>
                 <div class="hero-cta">
                     <a href="#products" class="cta-primary">
@@ -45,26 +47,55 @@
                 </div>
             </div>
             <div class="hero-visual">
-                <div class="code-window">
+                <div class="code-window main-window">
                     <div class="window-header">
                         <span class="dot"></span>
                         <span class="dot"></span>
                         <span class="dot"></span>
                     </div>
                     <div class="code-content">
-                        <pre><code>
+                        <pre><code class="language-javascript">
 class Benek {
-    init() {
-        this.connect()
-        this.innovate()
+    constructor() {
+        this.version = '1.0.0'
+        this.ready = false
     }
 
-    connect() {
-        // Evcil dostlar ve bakıcıları
-        // bir araya getiriyoruz
-    }
-}
+    init() {
+        this.connect()
+        this.setupAI()
+        this.ready = true
                         </code></pre>
+                    </div>
+                </div>
+                
+                <div class="code-window side-window top-left">
+                    <div class="window-header">
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                    <div class="code-content small-window">
+                        <pre><code class="language-javascript">
+function innovate() {
+    return future;
+}</code></pre>
+                        <div class="cursor"></div>
+                    </div>
+                </div>
+                
+                <div class="code-window side-window bottom-left">
+                    <div class="window-header">
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                    <div class="code-content small-window">
+                        <pre><code class="language-javascript">
+async function match() {
+    await AI.process();
+}</code></pre>
+                        <div class="cursor"></div>
                     </div>
                 </div>
             </div>
@@ -75,39 +106,51 @@ class Benek {
         </section>
 
         <section id="products" class="products">
-            <h2>Ürünlerimiz</h2>
-            <div class="product-card">
-                <img src="assets/benek-app.png" alt="Benek App">
-                <h3>Benek</h3>
-                <p>Evcil hayvan bakıcısı bulma platformu</p>
-                <div class="app-links">
-                    <a href="#" class="app-store"><i class="fab fa-app-store"></i> App Store</a>
-                    <a href="#" class="play-store"><i class="fab fa-google-play"></i> Google Play</a>
+            <div class="section-container">
+                <h2>Ürünlerimiz</h2>
+                <div class="product-grid">
+                    <div class="product-card">
+                        <img src="https://placehold.co/300x200/2b2b2b/ffffff?text=Benek+App" alt="Benek App">
+                        <h3>Benek</h3>
+                        <p>Evcil hayvan bakıcısı bulma platformu</p>
+                        <div class="app-links">
+                            <a href="#" class="app-store">
+                                <i class="fab fa-apple"></i>
+                                <span>App Store</span>
+                            </a>
+                            <a href="#" class="play-store">
+                                <i class="fab fa-google-play"></i>
+                                <span>Google Play</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
         <section class="tech-stack">
             <h2>Teknolojilerimiz</h2>
-            <div class="tech-item">
-                <i class="fab fa-react tech-icon"></i>
-                <h3>React Native</h3>
-                <p>Mobil Uygulama Geliştirme</p>
-            </div>
-            <div class="tech-item">
-                <i class="fab fa-node-js tech-icon"></i>
-                <h3>Node.js</h3>
-                <p>Backend Çözümleri</p>
-            </div>
-            <div class="tech-item">
-                <i class="fas fa-brain tech-icon"></i>
-                <h3>Yapay Zeka</h3>
-                <p>AI Entegrasyonları</p>
-            </div>
-            <div class="tech-item">
-                <i class="fas fa-database tech-icon"></i>
-                <h3>MongoDB</h3>
-                <p>Veritabanı Çözümleri</p>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <i class="fab fa-react tech-icon"></i>
+                    <h3>React Native</h3>
+                    <p>Mobil Uygulama Geliştirme</p>
+                </div>
+                <div class="tech-item">
+                    <i class="fab fa-node-js tech-icon"></i>
+                    <h3>Node.js</h3>
+                    <p>Backend Çözümleri</p>
+                </div>
+                <div class="tech-item">
+                    <i class="fas fa-brain tech-icon"></i>
+                    <h3>Yapay Zeka</h3>
+                    <p>AI Entegrasyonları</p>
+                </div>
+                <div class="tech-item">
+                    <i class="fas fa-database tech-icon"></i>
+                    <h3>MongoDB</h3>
+                    <p>Veritabanı Çözümleri</p>
+                </div>
             </div>
         </section>
 
@@ -145,5 +188,8 @@ class Benek {
     </footer>
 
     <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
 </body>
 </html> 

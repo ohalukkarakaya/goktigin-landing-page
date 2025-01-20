@@ -25,8 +25,7 @@ function animateNumbers() {
     numbers.forEach(number => {
         const target = parseFloat(number.textContent);
         let current = 0;
-        const increment = target / 100; // Daha yumuşak animasyon
-        const duration = 2000; // 2 saniye
+        const duration = 2000;
         const startTime = performance.now();
         
         function update(currentTime) {
@@ -34,7 +33,11 @@ function animateNumbers() {
             const progress = Math.min(elapsed / duration, 1);
             
             current = progress * target;
-            number.textContent = current.toFixed(target % 1 === 0 ? 0 : 1);
+            if (target % 1 === 0) {
+                number.textContent = Math.round(current) + (number.textContent.includes('+') ? '+' : '');
+            } else {
+                number.textContent = current.toFixed(1);
+            }
             
             if (progress < 1) {
                 requestAnimationFrame(update);
@@ -67,23 +70,36 @@ document.querySelectorAll('.tech-item, .stats, .hero-text').forEach(el => {
 
 // Kod yazma animasyonu düzeltmesi
 function startTypingAnimation() {
-    const codeElement = document.querySelector('.code-content code');
-    const text = codeElement.textContent;
-    codeElement.textContent = '';
-    let i = 0;
+    const mainCodeElement = document.querySelector('.main-window .code-content code');
+    if (!mainCodeElement) return;
 
+    const originalText = mainCodeElement.textContent.trim();
+    const lines = originalText.split('\n');
+    const emptyLines = Array(lines.length).fill('').join('\n');
+    mainCodeElement.textContent = emptyLines;
+    
+    let i = 0;
     function typeChar() {
-        if (i < text.length) {
-            codeElement.textContent += text.charAt(i);
+        if (i < originalText.length) {
+            const currentText = originalText.substring(0, i + 1);
+            mainCodeElement.textContent = currentText + 
+                '\n'.repeat(lines.length - currentText.split('\n').length);
             i++;
-            setTimeout(typeChar, 50);
+            requestAnimationFrame(() => {
+                setTimeout(typeChar, 50);
+                Prism.highlightElement(mainCodeElement);
+            });
         }
     }
-
-    typeChar();
+    
+    // Ana pencere animasyonunu başlat
+    setTimeout(typeChar, 800);
 }
 
 // Sayfa yüklendiğinde animasyonu başlat
 document.addEventListener('DOMContentLoaded', () => {
     startTypingAnimation();
+    document.querySelectorAll('.tech-item, .stats, .hero-text').forEach(el => {
+        observer.observe(el);
+    });
 }); 
