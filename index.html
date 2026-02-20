@@ -1,203 +1,253 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Göktigin Bilişim Teknoloji</title>
+    <title>Göktigin App Studio</title>
+    <meta name="description" content="Göktigin is an app studio in Antalya Teknokent building mobile products for the App Store and Google Play. Explore Chaput and Benek.">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="pattern-background"></div>
-    <header class="main-header">
-        <nav class="nav-container">
-            <div class="logo">
-                <img src="https://placehold.co/150x35/47cf73/ffffff?text=Göktigin" alt="Göktigin Logo">
-            </div>
+    <div class="ambient"></div>
+
+    <header class="site-header">
+        <nav class="nav">
+            <a class="logo" href="#top">Göktigin</a>
             <div class="nav-links">
-                <a href="#about">Hakkımızda</a>
-                <a href="#products">Ürünlerimiz</a>
-                <a href="#contact">İletişim</a>
+                <a href="#services">Studio</a>
+                <a href="#work">Apps</a>
+                <a href="#process">Process</a>
+                <a href="#contact">Contact</a>
             </div>
+            <a class="nav-cta" href="#contact">Say hello</a>
         </nav>
     </header>
 
-    <main>
+    <main id="top">
         <section class="hero">
-            <div class="hero-content">
-                <div class="hero-text">
-                    <h1>
-                        <span class="gradient-text">Build, Test, and Discover</span>
-                        <span class="subtitle">The best place to build and deploy your code</span>
-                    </h1>
-                    <p>A social development environment for front-end designers and developers.</p>
+            <div class="hero-content" data-reveal>
+                <span class="eyebrow">App Studio</span>
+                <h1>Build bold digital experiences</h1>
+                <p>Göktigin is an app studio in Antalya Teknokent crafting mobile products for the App Store and Google Play that people actually love to use.</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="#work">View apps</a>
+                    <a class="btn btn-secondary" href="#contact">Email us</a>
                 </div>
-                <div class="hero-cta">
-                    <a href="#products" class="cta-primary">
-                        <span>Çözümlerimizi Keşfedin</span>
-                        <svg class="arrow-icon" viewBox="0 0 24 24">
-                            <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                <div class="hero-meta" data-reveal data-delay="0.1s">
+                    <div>
+                        <span class="meta-label">Focus</span>
+                        <span class="meta-value">Mobile app development, iOS, Android, product design</span>
+                    </div>
+                    <div>
+                        <span class="meta-label">Based in</span>
+                        <span class="meta-value">Antalya Teknokent, Turkey</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual" data-reveal data-delay="0.2s">
+                <div class="stack-card">
+                    <div class="stack-header">
+                        <span class="chip">Studio Ops</span>
+                        <span class="chip">Sprint 12</span>
+                    </div>
+                    <div class="stack-body">
+                        <div class="stat">
+                            <span class="stat-value">In progress</span>
+                            <span class="stat-label">Current build</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value">Store prep</span>
+                            <span class="stat-label">Release stage</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value">Quality first</span>
+                            <span class="stat-label">Build principle</span>
+                        </div>
+                    </div>
+                    <div class="stack-image">
+                        <img src="https://images.unsplash.com/photo-1748885104614-f367f9dc177a?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=1600" alt="Abstract gradient backdrop" loading="lazy">
+                    </div>
+                </div>
+                <div class="float-card float-one">
+                    <span class="float-title">Launch Velocity</span>
+                    <span class="float-value">8-12 weeks</span>
+                </div>
+                <div class="float-card float-two">
+                    <span class="float-title">Design Systems</span>
+                    <span class="float-value">Multi-platform</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="ticker" aria-label="Studio highlights">
+            <div class="ticker-track">
+                <span>App studio</span>
+                <span>Mobile app development</span>
+                <span>iOS & Android</span>
+                <span>App Store & Google Play</span>
+                <span>Product design</span>
+                <span>App launch</span>
+                <span>Store-ready builds</span>
+            </div>
+            <div class="ticker-track" aria-hidden="true">
+                <span>App studio</span>
+                <span>Mobile app development</span>
+                <span>iOS & Android</span>
+                <span>App Store & Google Play</span>
+                <span>Product design</span>
+                <span>App launch</span>
+                <span>Store-ready builds</span>
+            </div>
+        </section>
+
+        <section id="services" class="section services">
+            <div class="section-head" data-reveal>
+                <h2>Independent app studio building for the stores</h2>
+                <p>We design and ship our own mobile apps and publish them to the App Store and Google Play. We do not sell anything to users and we do not collect payments from users.</p>
+            </div>
+            <div class="card-grid">
+                <article class="service-card" data-reveal data-delay="0.1s">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 7h16v10H4z"/>
+                            <path d="M8 4h8v3H8z"/>
                         </svg>
-                    </a>
-                    <a href="#contact" class="cta-secondary">İletişime Geçin</a>
-                </div>
-            </div>
-            <div class="hero-visual">
-                <div class="code-window main-window">
-                    <div class="window-header">
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
                     </div>
-                    <div class="code-content">
-                        <pre><code class="language-javascript">
-class Benek {
-    constructor() {
-        this.version = '1.0.0'
-        this.ready = false
-    }
-
-    init() {
-        this.connect()
-        this.setupAI()
-        this.ready = true
-                        </code></pre>
+                    <h3>Mobile product design</h3>
+                    <p>We craft simple, fast, and beautiful mobile experiences with a focus on everyday use.</p>
+                    <ul>
+                        <li>iOS and Android UX</li>
+                        <li>Design systems and QA</li>
+                        <li>Launch-ready app polish</li>
+                    </ul>
+                </article>
+                <article class="service-card" data-reveal data-delay="0.2s">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M6 4h12v16H6z"/>
+                            <path d="M9 9h6M9 12h6M9 15h6"/>
+                        </svg>
                     </div>
-                </div>
-                
-                <div class="code-window side-window top-left">
-                    <div class="window-header">
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
+                    <h3>Engineering & shipping</h3>
+                    <p>We build production-ready apps and take them through store submission and release.</p>
+                    <ul>
+                        <li>App Store and Google Play</li>
+                        <li>Performance and stability</li>
+                        <li>Maintenance after launch</li>
+                    </ul>
+                </article>
+                <article class="service-card" data-reveal data-delay="0.3s">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 3l7 4v6c0 4-3 7-7 8-4-1-7-4-7-8V7z"/>
+                            <path d="M9 12l2 2 4-4"/>
+                        </svg>
                     </div>
-                    <div class="code-content small-window">
-                        <pre><code class="language-javascript">
-function innovate() {
-    return future;
-}</code></pre>
-                        <div class="cursor"></div>
-                    </div>
-                </div>
-                
-                <div class="code-window side-window bottom-left">
-                    <div class="window-header">
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                    </div>
-                    <div class="code-content small-window">
-                        <pre><code class="language-javascript">
-async function match() {
-    await AI.process();
-}</code></pre>
-                        <div class="cursor"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="animated-bg">
-                <div class="animated-shape shape1"></div>
-                <div class="animated-shape shape2"></div>
+                    <h3>Launch-ready quality</h3>
+                    <p>We focus on stability, performance, and store compliance so releases go through smoothly.</p>
+                    <ul>
+                        <li>App Store & Google Play guidelines</li>
+                        <li>Performance and crash monitoring</li>
+                        <li>Localization, screenshots, metadata</li>
+                    </ul>
+                </article>
             </div>
         </section>
 
-        <section id="products" class="products">
-            <div class="section-container">
-                <div class="product-grid">
-                    <div class="product-card">
-                        <img src="https://placehold.co/300x200/2b2b2b/ffffff?text=Benek+App" alt="Benek App">
-                        <div class="product-info">
-                            <h3>Benek</h3>
-                            <p>Evcil hayvan bakıcısı bulma platformu. Güvenilir ve profesyonel bakıcılarla tanışın.</p>
-                        </div>
-                        <div class="product-meta">
-                            <div class="product-stats">
-                                <div class="stat">
-                                    <i class="fas fa-star"></i>
-                                    <span>4.8</span>
-                                </div>
-                                <div class="stat">
-                                    <i class="fas fa-download"></i>
-                                    <span>10k+</span>
-                                </div>
-                                <div class="stat">
-                                    <i class="fas fa-user"></i>
-                                    <span>1k+</span>
-                                </div>
-                            </div>
+        <section id="work" class="section work">
+            <div class="section-head" data-reveal>
+                <h2>Our apps</h2>
+                <p>Two focused products we are building in-house for the app stores.</p>
+            </div>
+            <div class="work-grid">
+                <article class="work-card" data-reveal data-delay="0.1s">
+                    <div class="work-media gradient-one"></div>
+                    <div class="work-content">
+                        <span class="tag">Mobile App</span>
+                        <h3>Chaput</h3>
+                        <p>Chaput is preparing for its first store release. Follow updates at <a href="https://chaput.app" target="_blank" rel="noopener">chaput.app</a>.</p>
+                        <div class="work-meta">
+                            <span>chaput.app</span>
+                            <span>Store launch soon</span>
                         </div>
                     </div>
+                </article>
+                <article class="work-card" data-reveal data-delay="0.2s">
+                    <div class="work-media gradient-three"></div>
+                    <div class="work-content">
+                        <span class="tag">On Hold</span>
+                        <h3>Benek</h3>
+                        <p>Benek is currently paused while we focus on our primary release.</p>
+                        <div class="work-meta">
+                            <span>Pet care concept</span>
+                            <span>Paused</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="process" class="section process">
+            <div class="section-head" data-reveal>
+                <h2>How we build</h2>
+                <p>We move from idea to store submission through a clear, quality-focused workflow.</p>
+            </div>
+            <div class="process-grid">
+                <div class="process-step" data-reveal data-delay="0.1s">
+                    <span class="step-number">01</span>
+                    <h3>Research</h3>
+                    <p>Define the user problem, market fit, and the simplest product scope.</p>
+                </div>
+                <div class="process-step" data-reveal data-delay="0.2s">
+                    <span class="step-number">02</span>
+                    <h3>Design</h3>
+                    <p>Turn insights into flows, UI, and a polished experience.</p>
+                </div>
+                <div class="process-step" data-reveal data-delay="0.3s">
+                    <span class="step-number">03</span>
+                    <h3>Build</h3>
+                    <p>Engineer fast, stable mobile apps and prepare store assets.</p>
+                </div>
+                <div class="process-step" data-reveal data-delay="0.4s">
+                    <span class="step-number">04</span>
+                    <h3>Launch</h3>
+                    <p>Ship to the App Store and Google Play, then iterate.</p>
                 </div>
             </div>
         </section>
 
-        <section class="tech-stack">
-            <h2>Teknolojilerimiz</h2>
-            <div class="tech-grid">
-                <div class="tech-item">
-                    <i class="fab fa-react tech-icon"></i>
-                    <h3>React Native</h3>
-                    <p>Mobil Uygulama Geliştirme</p>
-                </div>
-                <div class="tech-item">
-                    <i class="fab fa-node-js tech-icon"></i>
-                    <h3>Node.js</h3>
-                    <p>Backend Çözümleri</p>
-                </div>
-                <div class="tech-item">
-                    <i class="fas fa-brain tech-icon"></i>
-                    <h3>Yapay Zeka</h3>
-                    <p>AI Entegrasyonları</p>
-                </div>
-                <div class="tech-item">
-                    <i class="fas fa-database tech-icon"></i>
-                    <h3>MongoDB</h3>
-                    <p>Veritabanı Çözümleri</p>
-                </div>
+        <section id="contact" class="section cta" data-reveal>
+            <div>
+                <h2>Say hello</h2>
+                <p>Reach us for any topic. We respond by email and keep things simple.</p>
             </div>
-        </section>
-
-        <section class="stats">
-            <div class="stat-item">
-                <span class="stat-number">1000+</span>
-                <span class="stat-label">Mutlu Kullanıcı</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">50+</span>
-                <span class="stat-label">Profesyonel Bakıcı</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">4.8</span>
-                <span class="stat-label">Ortalama Puan</span>
-            </div>
-        </section>
-
-        <section id="contact" class="contact">
-            <h2>İletişime Geçin</h2>
-            <div class="contact-content">
-                <div class="contact-info">
-                    <p><i class="fas fa-envelope"></i> info@goktigin.com</p>
-                    <p><i class="fas fa-phone"></i> +90 xxx xxx xx xx</p>
-                    <p><i class="fas fa-location-dot"></i> İstanbul, Türkiye</p>
-                </div>
+            <div class="cta-actions">
+                <a class="btn btn-primary" href="mailto:hello@goktigin.com">hello@goktigin.com</a>
+                <span class="cta-note">Antalya Teknokent, Turkey</span>
             </div>
         </section>
     </main>
 
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2024 Göktigin Bilişim Teknoloji Limited Şirketi. Tüm hakları saklıdır.</p>
+    <footer class="footer">
+        <div>
+            <span class="logo">Göktigin</span>
+            <p>Independent app studio in Antalya Teknokent building mobile products for the App Store and Google Play.</p>
+            <p><a href="mailto:hello@goktigin.com">hello@goktigin.com</a></p>
+        </div>
+        <div class="footer-links">
+            <a href="#services">Services</a>
+            <a href="#work">Apps</a>
+            <a href="#process">Process</a>
+            <a href="#contact">Contact</a>
+        </div>
+        <div>
+            <p>© 2026 Göktigin App Studio. All rights reserved.</p>
         </div>
     </footer>
 
     <script src="script.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
 </body>
-</html> 
+</html>
