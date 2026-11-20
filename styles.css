@@ -294,7 +294,19 @@ address { font-style: normal; }
   border: 0;
 }
 
-.foot span:nth-child(2) { opacity: 0.8; }
+.foot { flex-direction: column; gap: 22px; }
+.foot-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+.foot-row span:nth-child(2) { opacity: 0.8; }
+.motto { margin: 0; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.motto blockquote { margin: 0; }
+.motto blockquote p { margin: 0; font-family: var(--sans); font-size: 15px; color: var(--soft); letter-spacing: 0; }
+.motto .motto-en { margin-top: 3px; font-family: var(--mono); font-size: 11px; color: var(--dim); }
+.motto img { display: block; width: 92px; height: auto; opacity: 0.85; transition: opacity 160ms ease; }
+/* hovering the signature turns the cursor into a heart (hotspot in the middle, pointer as fallback) */
+.motto img:hover {
+  opacity: 1;
+  cursor: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='24'%3E%E2%9D%A4%EF%B8%8F%3C/text%3E%3C/svg%3E") 16 16, pointer;
+}
 
 @keyframes blink { 50% { opacity: 0; } }
 

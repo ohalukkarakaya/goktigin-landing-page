@@ -18,7 +18,7 @@ if "@" not in EMAIL:
 
 SITE = "https://goktigin.com"
 UPDATED_ISO = "2026-11-20"
-V = "8"  # cache-busting version for styles.css and script.js
+V = "11"  # cache-busting version for styles.css and script.js
 
 T = {
   "en": {
@@ -71,6 +71,7 @@ T = {
     "addr": "Antalya Teknokent, Antalya, Turkey",
     "updated": "Last updated 20 November 2026",
     "rights": "© 2026 Göktigin Bilişim Teknoloji Ltd. Şti.",
+    "motto_en": "Love of country is measured by service to it.",
   },
   "tr": {
     "lang": "tr", "locale": "tr_TR", "path": "/tr/", "other": "en", "other_path": "/", "other_label": "EN",
@@ -122,6 +123,7 @@ T = {
     "addr": "Antalya Teknokent, Antalya, Türkiye",
     "updated": "Son güncelleme: 20 Kasım 2026",
     "rights": "© 2026 Göktigin Bilişim Teknoloji Ltd. Şti.",
+    "motto_en": "",
   },
 }
 
@@ -353,9 +355,15 @@ def page(t):
   </main>
 
   <footer class="foot">
-    <span>{e(t['rights'])}</span>
-    <span><time datetime="{UPDATED_ISO}">{e(t['updated'])}</time></span>
-    <a href="mailto:{mail}">{mail}</a>
+    <figure class="motto">
+      <blockquote lang="tr"><p>“Yurt sevgisi ona hizmetle ölçülür.”</p>{f'<p class="motto-en" lang="en">{e(t["motto_en"])}</p>' if t["motto_en"] else ''}</blockquote>
+      <figcaption><img src="/assets/ataturk-signature.svg" alt="Mustafa Kemal Atatürk" width="92" height="33" loading="lazy"></figcaption>
+    </figure>
+    <div class="foot-row">
+      <span>{e(t['rights'])}</span>
+      <span><time datetime="{UPDATED_ISO}">{e(t['updated'])}</time></span>
+      <a href="mailto:{mail}">{mail}</a>
+    </div>
   </footer>
 
   <script type="module" src="/script.js?v={V}"></script>

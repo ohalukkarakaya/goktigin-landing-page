@@ -42,7 +42,10 @@ async function main() {
 
   /* ── sizes ─────────────────────────────────────────── */
   let W = innerWidth, H = innerHeight;
-  let dpr = Math.min(devicePixelRatio || 1, 2);
+  // Pixel ratio is capped at 1.5 (glyphs stay sharp, a third less fill work than 2x),
+  // and drops to 1 on its own if frames keep arriving late.
+  let dprCap = 1.5;
+  let dpr = Math.min(devicePixelRatio || 1, dprCap);
   const CELL_CSS = touchFirst || W < 820 ? 7 : 8;
   let cellW = 0, cellH = 0;
 
@@ -312,7 +315,7 @@ async function main() {
   const layout = { x: 0, y: 0, s: 1, os: 1, yaw: 0 };
   function resize() {
     W = innerWidth; H = innerHeight;
-    const nextDpr = Math.min(devicePixelRatio || 1, 2);
+    const nextDpr = Math.min(devicePixelRatio || 1, dprCap);
     const dprChanged = nextDpr !== dpr || !atlas;
     dpr = nextDpr;
     renderer.setPixelRatio(dpr);
@@ -426,6 +429,19 @@ async function main() {
     if (prev === 'emblem' || prev === 'hero' || state.device < 0.3) { current = name; spin = null; return; }
     spin = { t0: performance.now(), to: name, swapped: false };
   }
+  // Render budget: 30 fps while someone interacts, 15 fps when the page just idles,
+  // 8 fps when the window is in the background but still on screen.
+  let activeUntil = 0;
+  const poke = () => { activeUntil = performance.now() + 1600; };
+  addEventListener('pointermove', poke, { passive: true });
+  addEventListener('scroll', poke, { passive: true });
+  addEventListener('touchmove', poke, { passive: true });
+  addEventListener('wheel', poke, { passive: true });
+  let focused = document.hasFocus();
+  addEventListener('focus', () => { focused = true; poke(); });
+  addEventListener('blur', () => { focused = false; });
+  let lateFrames = 0, timedFrames = 0;
+
   let activeEl = document.querySelector('[data-scene]');
   let anchored = false;
   const io = new IntersectionObserver((entries) => {
@@ -448,9 +464,20 @@ async function main() {
 
   function frame(now) {
     if (!running) return;
-    // 30 fps is plenty for characters and halves the GPU work
-    if (now - last < 30) { requestAnimationFrame(frame); return; }
-    const dt = Math.min((now - last) / 1000, 0.05);
+    const busy = now < activeUntil || spin || intro < 1 || lens.r > 1
+      || Math.abs(state.device - state.devT) > 0.02 || Math.abs(state.emblem - state.embT) > 0.02;
+    const budget = !focused && !busy ? 120 : busy ? 32 : 64;
+    if (now - last < budget) { requestAnimationFrame(frame); return; }
+    // frames that keep arriving far later than asked mean the GPU is struggling: drop to 1x
+    if (busy && dprCap > 1 && (devicePixelRatio || 1) > 1) {
+      timedFrames++;
+      if (now - last > 55) lateFrames++;
+      if (timedFrames >= 45) {
+        if (lateFrames > 25) { dprCap = 1; resize(); }
+        timedFrames = 0; lateFrames = 0;
+      }
+    }
+    const dt = Math.min((now - last) / 1000, 0.13);
     last = now;
     const t = reduced ? 0 : (now - t0) / 1000;
     const k = (rate) => 1 - Math.exp(-rate * dt);
