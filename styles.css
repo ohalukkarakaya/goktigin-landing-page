@@ -335,7 +335,7 @@ address { font-style: normal; }
 
 /* desktop: the mobile wrappers are plain blocks and the mobile-only chrome stays hidden */
 .products, .slides { display: block; }
-.tabbar, .dots, .swipe-hint { display: none; }
+.tabbar, .dots, .swipe-hint, .card > .short { display: none; }
 
 /* ── phones: an app shell ─────────────────────────────────
    The document itself never scrolls, so iOS keeps its toolbars still and the viewport
@@ -438,18 +438,22 @@ address { font-style: normal; }
     scroll-snap-align: center;
     scroll-snap-stop: always;
   }
-  .products .build .prompt { display: none; }
+  /* the terminal prompts are a desktop flourish; on a phone they only cost room */
+  .prompt { display: none; }
+  /* product cards: the one-line summary replaces the paragraph */
+  .products .card > p:not(.short) { display: none; }
+  .products .card > .short { display: block; }
   .products .card { flex: 1; display: flex; flex-direction: column; }
-  .products .card { padding: 18px 18px 16px; }
+  .products .card { padding: 16px 18px 16px; }
   /* the full text stays in the page (and for search); the card shows the gist */
   .products .card > p {
-    font-size: 14.5px; line-height: 1.45; margin-top: 8px; flex: 1;
+    font-size: 15px; line-height: 1.45; margin-top: 6px; flex: 1;
     display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden;
   }
   @media (max-height: 720px) { .products .card > p { -webkit-line-clamp: 3; line-clamp: 3; } }
-  .products h3 { font-size: 21px; }
+  .products h3 { font-size: 20px; }
   /* the terminal lines shrink away; only its link stays, as a pill button */
-  .products .term { font-size: 0; line-height: 0; margin: 14px 0 0; padding: 0; border: 0; }
+  .products .term { font-size: 0; line-height: 0; margin: 12px 0 0; padding: 0; border: 0; }
   .products .term a {
     display: inline-flex;
     align-items: center;

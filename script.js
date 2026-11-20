@@ -540,7 +540,11 @@ async function main() {
     if (shell) {
       // a quick, still tap on the stage: the device compiles, anywhere else the lens drops in
       if (!touch.moved && touch.tap && performance.now() - touch.t0 < 400) {
-        if (insideDevice(touch.x, touch.y)) { closeLens(); replayReveal(); }
+        if (insideDevice(touch.x, touch.y)) {
+          closeLens();
+          // a tap flips the phone between its real screen and its code
+          if (reveal.target === 1) { reveal.target = 0; reveal.shown = state.scene; } else replayReveal();
+        }
         else openLens(touch.x, touch.y);
       }
       return;
@@ -581,7 +585,7 @@ async function main() {
   function replayReveal() {
     if (!PRODUCTS.has(state.scene) || !screens[current].real) return;
     reveal.target = 1; reveal.shown = state.scene;
-    reveal.until = performance.now() + 4200;
+    reveal.until = shell ? Infinity : performance.now() + 4200;
     poke();
   }
 
@@ -793,10 +797,10 @@ async function main() {
       // the top bar and that text, measured live, so no phone height leaves a hole.
       // The object rides with its page; while the scene hands over it glides to the new spot.
       const top = page.el.getBoundingClientRect().top;
-      const first = page.el.firstElementChild?.classList.contains('sr-only')
-        ? page.el.children[1] : page.el.firstElementChild;
-      const contentTop = first ? first.getBoundingClientRect().top : top + H * 0.5;
-      const boxH = THREE.MathUtils.clamp(contentTop - top - layout.boxTop, H * 0.16, H * 0.58);
+      // the first child that is actually laid out (hidden prompts and sr-only headings don't count)
+      page.first ??= [...page.el.children].find((c) => !c.classList.contains('sr-only') && c.getClientRects().length > 0);
+      const contentTop = page.first ? page.first.getBoundingClientRect().top : top + H * 0.5;
+      const boxH = THREE.MathUtils.clamp(contentTop - top - layout.boxTop, H * 0.16, H * 0.68);
       const cy = top + layout.boxTop + boxH / 2;
       const ty = layout.halfH * (1 - (2 * cy) / H);
       const rate = now - sceneAt > 700 ? 40 : 7;
@@ -804,15 +808,15 @@ async function main() {
       const world = (boxH / H) * 2 * layout.halfH;
       const halfW = layout.halfH * camera.aspect;
       const products = page.el.id === 'products';
-      const sT = Math.min((world * 0.9) / DH, (halfW * 2 * 0.62) / DW);
+      const sT = Math.min((world * 0.95) / DH, (halfW * 2 * 0.78) / DW);
       const hero = page.el.classList.contains('hero');
       // the logo is drawn big: on the card pages its lower part may sink under the card,
       // on the hero (bare text, no card) it stays inside its box
       const eT = products
         ? Math.min((world * 0.62) / 2, (halfW * 2 * 0.62) / 2)
         : hero
-          ? Math.min((world * 1.0) / 2, (halfW * 2 * 0.72) / 2)
-          : Math.min((world * 1.32) / 2, (halfW * 2 * 0.86) / 2);
+          ? Math.min((world * 1.05) / 2, (halfW * 2 * 0.94) / 2)
+          : Math.min((world * 1.4) / 2, (halfW * 2 * 1.02) / 2);
       const eyT = products || hero ? ty : layout.halfH * (1 - (2 * (top + layout.boxTop + boxH * 0.62)) / H);
       const kk = anchored ? k(rate === 40 ? 12 : 5) : 1;
       layout.s += (sT - layout.s) * kk;
@@ -943,8 +947,13 @@ async function main() {
     if (autoReveal) {
       // the device has to be fully in the clear: nothing scrolled over it, not mid-swap
       let clear = PRODUCTS.has(state.scene) && !spin && current === state.scene && devRect.ok && !!screens[current].real;
-      if (clear && shell) clear = page?.el.id === 'products' && Math.abs(page.el.getBoundingClientRect().top) < 3 && Math.abs(slide.p - Math.round(slide.p)) < 0.01;
-      if (clear) {
+      if (shell) {
+        const moving = Math.abs(slide.p - Math.round(slide.p)) > 0.01;
+        // the moment a swipe starts the phone drops back into characters, and recompiles once it lands
+        if (moving && reveal.shown) { reveal.target = 0; reveal.shown = null; }
+        clear = clear && page?.el.id === 'products' && Math.abs(page.el.getBoundingClientRect().top) < 3 && !moving;
+      }
+      if (clear && !shell) {
         // hit-testing is cheap but not free: look again at most every 150 ms
         if (now - hit.at > 150) {
           hit.at = now; hit.covered = false;
@@ -961,13 +970,13 @@ async function main() {
         if (reveal.shown !== state.scene || spin) { reveal.target = 0; reveal.shown = null; }
       } else {
         if (!reveal.clearSince) reveal.clearSince = now;
-        if (reveal.shown !== state.scene && now - reveal.clearSince > 550) replayReveal();
+        if (reveal.shown !== state.scene && now - reveal.clearSince > (shell ? 220 : 550)) replayReveal();
       }
       if (reveal.target === 1 && now > reveal.until) reveal.target = 0;
     } else {
       reveal.target = 0;
     }
-    reveal.p = THREE.MathUtils.clamp(reveal.p + (reveal.target ? dt / 0.9 : -dt / 0.55), 0, 1);
+    reveal.p = THREE.MathUtils.clamp(reveal.p + (reveal.target ? dt / (shell ? 0.6 : 0.9) : -dt / (shell ? 0.28 : 0.55)), 0, 1);
     if (!devRect.ok) reveal.p = 0;
     u.uRevP.value = reveal.p > 0 ? easeInOut(reveal.p) : 0;
     u.uRev.value.set(devRect.x0 * dpr, (H - devRect.y1) * dpr, devRect.x1 * dpr, (H - devRect.y0) * dpr);

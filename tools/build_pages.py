@@ -18,7 +18,7 @@ if "@" not in EMAIL:
 
 SITE = "https://goktigin.com"
 UPDATED_ISO = "2026-11-20"
-V = "29"  # cache-busting version for styles.css and script.js
+V = "34"  # cache-busting version for styles.css and script.js
 
 T = {
   "en": {
@@ -31,44 +31,47 @@ T = {
     "nav_label": "Sections",
     "nav": ["Products", "Process", "FAQ", "Contact"],
     "status": "Studio status",
-    "h1": "We turn code into products people&nbsp;use.",
-    "lede": "Göktigin is a software studio in Antalya Teknokent, Turkey. We design, build and run our own products: Art of Menu for restaurants and cafés, and Chaput, a social app for iOS and Android.",
+    "h1": "The studio behind Art of Menu and&nbsp;Chaput.",
+    "lede": "We design, build and run our own apps from Antalya Teknokent, Turkey.",
     "cta": "See our products",
     "hint_desktop": "Move your cursor over the characters. Under the lens they turn back into the real screen.",
     "hint_touch": "Touch and drag over the characters. Under the lens they turn back into the real screen.",
-    "swipe_hint": "Swipe for the next product · tap the phone to compile it",
+    "swipe_hint": "Swipe for the other products · tap the phone to see its code",
+    "benek_short": "Pet owners meet sitters they can trust. On hold for now.",
+    "chaput_short": "A women-first social app for goths, on iOS and Android.",
+    "aom_short": "QR menus, table ordering and smart pricing for restaurants and cafés.",
     "products_h": "Our products",
     "aom_tag": "New",
-    "aom_p": "Art of Menu runs QR menus, table ordering and pricing for restaurants and cafés. Owners manage menus, branches, tables and staff from one web panel, and prices can follow the hour and the weather.",
+    "aom_p": "Guests scan the QR code on the table to see the menu, order and call a waiter. Owners run menus, prices, branches, tables and staff from one web panel, and prices can change with the hour and the weather on their own.",
     "aom_term": ["qr menu · table ordering · waiter calls", "smart pricing · weather &amp; hour targeting", "web panel · menus, branches, staff"],
     "chaput_tag": "iOS · Android",
-    "chaput_p": "Chaput is a women-first social app for goths. It isn't a dating app. Every profile is a tree, and men join after three women in the community approve them.",
+    "chaput_p": "A social app for the goth community where women come first. It is not a dating app. Every profile is a tree, people tie chaputs to each other's trees, and men join once three women in the community approve them.",
     "chaput_term": ["profile trees · invites · achievements", "community admission"],
     "benek_tag": "Paused",
-    "benek_p": "Benek connects pet owners with sitters they can trust. It is on hold while we focus on Art of Menu and Chaput.",
-    "benek_term": "paused · waiting in the branch",
-    "process_h": "How we build",
+    "benek_p": "An app that connects pet owners with sitters they can trust. It is on hold while we put our time into Art of Menu and Chaput.",
+    "benek_term": "on hold for now",
+    "process_h": "We do it all in-house",
     "steps": [
-      ("Research.", "Find the real problem and the smallest product that solves it."),
-      ("Design.", "Turn it into screens people understand without a tutorial."),
-      ("Build.", "Write fast, stable code for the web, iOS and Android."),
-      ("Ship.", "Release to the stores and the web, watch how people use it, then improve it."),
+      ("Design.", "We design every screen and flow ourselves."),
+      ("Mobile.", "Chaput is one Flutter codebase that ships to iOS and Android."),
+      ("Web.", "Art of Menu's guest menu and owner panel run in the browser, with nothing to install."),
+      ("Servers.", "We run the backend, the payments and the store releases ourselves."),
     ],
-    "faq_h": "Questions",
+    "faq_h": "Common questions",
     "faq": [
       ("What is Göktigin?",
-       "Göktigin (Göktigin Bilişim Teknoloji Ltd. Şti.) is a software studio based in Antalya Teknokent, Turkey. It builds and runs its own products: Art of Menu, a QR menu and table ordering system for restaurants, and Chaput, a social app for iOS and Android."),
+       "Göktigin Bilişim Teknoloji Ltd. Şti. is a software studio at Antalya Teknokent, Turkey. We make our own products: Art of Menu, a QR menu and table ordering system for restaurants, and Chaput, a social app for iOS and Android."),
       ("What is Art of Menu?",
-       "Art of Menu is restaurant software made by Göktigin. Guests scan a QR code at the table to read the menu, order and call a waiter. Owners manage menus, prices, branches, tables and staff from a web panel. Details are at artofmenu.com."),
+       "Restaurant software made by Göktigin. Guests scan the QR code on the table to see the menu, order and call a waiter; owners manage menus, prices, branches, tables and staff from a web panel. More at artofmenu.com."),
       ("What is Chaput?",
-       "Chaput is a women-first social app for goths, made by Göktigin for iOS and Android. It is not a dating app. Each profile is a tree that others can tie a chaput to, and men join after three women in the community approve them. Details are at chaput.app."),
+       "A social app for the goth community where women come first, made by Göktigin for iOS and Android. It is not a dating app: every profile is a tree others can tie a chaput to, and men join after three women approve them. More at chaput.app."),
       ("Where is Göktigin based?",
-       "Göktigin is based at Antalya Teknokent, the technology park in Antalya, Turkey."),
+       "At Antalya Teknokent, the technology park in Antalya, Turkey."),
       ("How do I contact Göktigin?",
        "Write to {EMAIL}. We reply by email."),
     ],
-    "contact_h": "Say hello.",
-    "contact_p": "Write to us about anything. We reply by email.",
+    "contact_h": "Write to us.",
+    "contact_p": "A question about our products, an idea, anything else: send an email and we will write back.",
     "addr": "Antalya Teknokent, Antalya, Turkey",
     "updated": "Last updated 20 November 2026",
     "rights": "© 2026 Göktigin Bilişim Teknoloji Ltd. Şti.",
@@ -84,44 +87,47 @@ T = {
     "nav_label": "Bölümler",
     "nav": ["Ürünler", "Süreç", "SSS", "İletişim"],
     "status": "Stüdyo durumu",
-    "h1": "Kodu, insanların kullandığı ürünlere dönüştürüyoruz.",
-    "lede": "Göktigin, Antalya Teknokent'te bir yazılım stüdyosu. Kendi ürünlerimizi tasarlıyor, geliştiriyor ve işletiyoruz: restoran ve kafeler için Art of Menu, iOS ve Android için sosyal uygulama Chaput.",
+    "h1": "Art of Menu ve Chaput'u yapan stüdyo.",
+    "lede": "Antalya Teknokent'te kendi uygulamalarımızı tasarlıyor, geliştiriyor ve işletiyoruz.",
     "cta": "Ürünlerimiz",
     "hint_desktop": "İmleci karakterlerin üzerinde gezdirin. Merceğin altında gerçek ekran görünür.",
     "hint_touch": "Karakterlere dokunup sürükleyin. Merceğin altında gerçek ekran görünür.",
-    "swipe_hint": "Diğer ürün için kaydır · derlemek için telefona dokun",
+    "swipe_hint": "Diğer ürünler için kaydır · kodunu görmek için telefona dokun",
+    "benek_short": "Evcil hayvan sahiplerini güvenilir bakıcılarla buluşturur. Şimdilik beklemede.",
+    "chaput_short": "Gotikler için kadın öncelikli sosyal uygulama. iOS ve Android'de.",
+    "aom_short": "Restoran ve kafeler için QR menü, masadan sipariş ve akıllı fiyat.",
     "products_h": "Ürünlerimiz",
     "aom_tag": "Yeni",
-    "aom_p": "Art of Menu, restoran ve kafeler için QR menü, masadan sipariş ve fiyatlandırma sistemi. İşletme sahibi menüleri, şubeleri, masaları ve çalışanları tek bir web panelinden yönetir. Fiyatlar saate ve havaya göre değişebilir.",
+    "aom_p": "Misafir masadaki QR kodu okutur; menüye bakar, sipariş verir, garson çağırır. İşletme menüyü, fiyatları, şubeleri, masaları ve ekibi tek bir web panelinden yönetir. Fiyatlar saate ve havaya göre kendiliğinden değişebilir.",
     "aom_term": ["qr menü · masadan sipariş · garson çağırma", "akıllı fiyat · saate ve havaya göre", "web panel · menü, şube, ekip"],
     "chaput_tag": "iOS · Android",
-    "chaput_p": "Chaput, gotikler için kadın öncelikli bir sosyal uygulama. Flört uygulaması değil. Her profil bir ağaç; erkekler, topluluktaki üç kadın profillerini onayladıktan sonra katılabiliyor.",
+    "chaput_p": "Gotik topluluğu için, kadınların öncelikli olduğu bir sosyal uygulama. Flört uygulaması değil. Her profil bir ağaç, insanlar birbirinin ağacına çaput bağlar. Erkekler topluluktaki üç kadının onayıyla katılır.",
     "chaput_term": ["profil ağaçları · davetler · başarımlar", "topluluk onayıyla katılım"],
     "benek_tag": "Beklemede",
-    "benek_p": "Benek, evcil hayvan sahiplerini güvenebilecekleri bakıcılarla buluşturuyor. Art of Menu ve Chaput'a odaklandığımız için şimdilik beklemede.",
-    "benek_term": "beklemede · dalda duruyor",
-    "process_h": "Nasıl çalışıyoruz",
+    "benek_p": "Evcil hayvan sahiplerini güvenebilecekleri bakıcılarla buluşturan bir uygulama. Zamanımızı Art of Menu ve Chaput'a verdiğimiz için şimdilik beklemede.",
+    "benek_term": "şimdilik beklemede",
+    "process_h": "Her şeyi kendimiz yapıyoruz",
     "steps": [
-      ("Araştırma.", "Asıl sorunu ve onu çözen en küçük ürünü bulmak."),
-      ("Tasarım.", "Bunu, öğretici gerektirmeden anlaşılan ekranlara dönüştürmek."),
-      ("Geliştirme.", "Web, iOS ve Android için hızlı ve sağlam kod yazmak."),
-      ("Yayın.", "Mağazalara ve web'e çıkarmak, insanların nasıl kullandığına bakmak, sonra iyileştirmek."),
+      ("Tasarım.", "Her ekranı ve akışı kendimiz tasarlıyoruz."),
+      ("Mobil.", "Chaput tek bir Flutter kod tabanından iOS'a ve Android'e çıkıyor."),
+      ("Web.", "Art of Menu'nun misafir menüsü ve işletme paneli tarayıcıda çalışır, bir şey indirmek gerekmez."),
+      ("Sunucu.", "Sunucuları, ödemeleri ve mağaza yayınlarını da biz yönetiyoruz."),
     ],
     "faq_h": "Sık sorulanlar",
     "faq": [
       ("Göktigin nedir?",
-       "Göktigin (Göktigin Bilişim Teknoloji Ltd. Şti.), Antalya Teknokent'te bulunan bir yazılım stüdyosu. Kendi ürünlerini geliştirip işletiyor: restoranlar için QR menü ve masadan sipariş sistemi Art of Menu ile iOS ve Android'deki sosyal uygulama Chaput."),
+       "Göktigin Bilişim Teknoloji Ltd. Şti., Antalya Teknokent'te bir yazılım stüdyosu. Kendi ürünlerimizi yapıyoruz: restoranlar için QR menü ve masadan sipariş sistemi Art of Menu, iOS ve Android için sosyal uygulama Chaput."),
       ("Art of Menu nedir?",
-       "Art of Menu, Göktigin'in geliştirdiği restoran yazılımı. Misafirler masadaki QR kodu okutarak menüyü görür, sipariş verir ve garson çağırır. İşletme sahibi menüleri, fiyatları, şubeleri, masaları ve çalışanları web panelinden yönetir. Ayrıntılar artofmenu.com adresinde."),
+       "Göktigin'in restoran yazılımı. Misafir masadaki QR kodu okutup menüye bakar, sipariş verir, garson çağırır; işletme menüyü, fiyatları, şubeleri, masaları ve ekibi web panelinden yönetir. Ayrıntılar artofmenu.com'da."),
       ("Chaput nedir?",
-       "Chaput, Göktigin'in iOS ve Android için geliştirdiği, gotikler için kadın öncelikli bir sosyal uygulama. Flört uygulaması değil. Her profil, başkalarının çaput bağlayabildiği bir ağaç; erkekler topluluktaki üç kadının onayıyla katılıyor. Ayrıntılar chaput.app adresinde."),
+       "Göktigin'in iOS ve Android için yaptığı, gotik topluluğuna yönelik ve kadınların öncelikli olduğu bir sosyal uygulama. Flört uygulaması değil: her profil, başkalarının çaput bağlayabildiği bir ağaç ve erkekler üç kadının onayıyla katılır. Ayrıntılar chaput.app'te."),
       ("Göktigin nerede?",
-       "Göktigin, Antalya'daki teknoloji parkı Antalya Teknokent'te bulunuyor."),
+       "Antalya'daki teknoloji parkı Antalya Teknokent'te."),
       ("Göktigin'e nasıl ulaşırım?",
        "{EMAIL} adresine yazabilirsiniz. E-postayla dönüş yapıyoruz."),
     ],
     "contact_h": "Bize yazın.",
-    "contact_p": "Her konuda yazabilirsiniz. E-postayla dönüş yapıyoruz.",
+    "contact_p": "Ürünlerimizle ilgili bir sorunuz, bir fikriniz ya da başka bir konu: e-posta gönderin, cevap yazalım.",
     "addr": "Antalya Teknokent, Antalya, Türkiye",
     "updated": "Son güncelleme: 20 Kasım 2026",
     "rights": "© 2026 Göktigin Bilişim Teknoloji Ltd. Şti.",
@@ -298,6 +304,7 @@ def page(t):
           <span class="tag tag-hot">{e(t['aom_tag'])}</span>
         </div>
         <p>{e(t['aom_p'])}</p>
+        <p class="short">{e(t['aom_short'])}</p>
         <pre class="term"><span class="dim">$</span> build art-of-menu
 {aom_term}
 <span class="go">→</span> <a href="https://artofmenu.com" target="_blank" rel="noopener">artofmenu.com</a></pre>
@@ -312,6 +319,7 @@ def page(t):
           <span class="tag">{e(t['chaput_tag'])}</span>
         </div>
         <p>{e(t['chaput_p'])}</p>
+        <p class="short">{e(t['chaput_short'])}</p>
         <pre class="term"><span class="dim">$</span> build chaput --target ios,android
 {ch_term}
 <span class="go">→</span> <a href="https://chaput.app" target="_blank" rel="noopener">chaput.app</a></pre>
@@ -326,6 +334,7 @@ def page(t):
           <span class="tag tag-mute">{e(t['benek_tag'])}</span>
         </div>
         <p>{e(t['benek_p'])}</p>
+        <p class="short">{e(t['benek_short'])}</p>
         <pre class="term"><span class="dim">$</span> build benek
 <span class="warn">‖</span> {e(t['benek_term'])}</pre>
       </article>

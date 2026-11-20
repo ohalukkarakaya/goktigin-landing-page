@@ -9,9 +9,9 @@ Last updated: 2026-11-20
 
 ## Products
 
-- [Art of Menu](https://artofmenu.com): Art of Menu runs QR menus, table ordering and pricing for restaurants and cafés. Owners manage menus, branches, tables and staff from one web panel, and prices can follow the hour and the weather.
-- [Chaput](https://chaput.app): Chaput is a women-first social app for goths. It isn't a dating app. Every profile is a tree, and men join after three women in the community approve them. Available on iOS and Android.
-- Benek: Benek connects pet owners with sitters they can trust. It is on hold while we focus on Art of Menu and Chaput.
+- [Art of Menu](https://artofmenu.com): Guests scan the QR code on the table to see the menu, order and call a waiter. Owners run menus, prices, branches, tables and staff from one web panel, and prices can change with the hour and the weather on their own.
+- [Chaput](https://chaput.app): A social app for the goth community where women come first. It is not a dating app. Every profile is a tree, people tie chaputs to each other's trees, and men join once three women in the community approve them. Available on iOS and Android.
+- Benek: An app that connects pet owners with sitters they can trust. It is on hold while we put our time into Art of Menu and Chaput.
 
 ## Pages
 
@@ -22,19 +22,19 @@ Last updated: 2026-11-20
 
 ### What is Göktigin?
 
-Göktigin (Göktigin Bilişim Teknoloji Ltd. Şti.) is a software studio based in Antalya Teknokent, Turkey. It builds and runs its own products: Art of Menu, a QR menu and table ordering system for restaurants, and Chaput, a social app for iOS and Android.
+Göktigin Bilişim Teknoloji Ltd. Şti. is a software studio at Antalya Teknokent, Turkey. We make our own products: Art of Menu, a QR menu and table ordering system for restaurants, and Chaput, a social app for iOS and Android.
 
 ### What is Art of Menu?
 
-Art of Menu is restaurant software made by Göktigin. Guests scan a QR code at the table to read the menu, order and call a waiter. Owners manage menus, prices, branches, tables and staff from a web panel. Details are at artofmenu.com.
+Restaurant software made by Göktigin. Guests scan the QR code on the table to see the menu, order and call a waiter; owners manage menus, prices, branches, tables and staff from a web panel. More at artofmenu.com.
 
 ### What is Chaput?
 
-Chaput is a women-first social app for goths, made by Göktigin for iOS and Android. It is not a dating app. Each profile is a tree that others can tie a chaput to, and men join after three women in the community approve them. Details are at chaput.app.
+A social app for the goth community where women come first, made by Göktigin for iOS and Android. It is not a dating app: every profile is a tree others can tie a chaput to, and men join after three women approve them. More at chaput.app.
 
 ### Where is Göktigin based?
 
-Göktigin is based at Antalya Teknokent, the technology park in Antalya, Turkey.
+At Antalya Teknokent, the technology park in Antalya, Turkey.
 
 ### How do I contact Göktigin?
 

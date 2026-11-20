@@ -53,14 +53,14 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"></noscript>
   <link rel="preload" href="/assets/fonts/QanelasBold.otf" as="font" type="font/otf" crossorigin>
-  <link rel="stylesheet" href="/styles.css?v=29">
+  <link rel="stylesheet" href="/styles.css?v=34">
   <script type="importmap">
     { "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js",
         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
     } }
   </script>
-  <link rel="modulepreload" href="/script.js?v=29">
+  <link rel="modulepreload" href="/script.js?v=34">
   <link rel="modulepreload" href="/data.js">
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" crossorigin>
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/environments/RoomEnvironment.js" crossorigin>
@@ -102,7 +102,7 @@
       "url": "https://artofmenu.com",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "description": "Art of Menu, restoran ve kafeler için QR menü, masadan sipariş ve fiyatlandırma sistemi. İşletme sahibi menüleri, şubeleri, masaları ve çalışanları tek bir web panelinden yönetir. Fiyatlar saate ve havaya göre değişebilir.",
+      "description": "Misafir masadaki QR kodu okutur; menüye bakar, sipariş verir, garson çağırır. İşletme menüyü, fiyatları, şubeleri, masaları ve ekibi tek bir web panelinden yönetir. Fiyatlar saate ve havaya göre kendiliğinden değişebilir.",
       "publisher": {
         "@id": "https://goktigin.com/#org"
       }
@@ -114,7 +114,7 @@
       "url": "https://chaput.app",
       "applicationCategory": "SocialNetworkingApplication",
       "operatingSystem": "iOS, Android",
-      "description": "Chaput, gotikler için kadın öncelikli bir sosyal uygulama. Flört uygulaması değil. Her profil bir ağaç; erkekler, topluluktaki üç kadın profillerini onayladıktan sonra katılabiliyor.",
+      "description": "Gotik topluluğu için, kadınların öncelikli olduğu bir sosyal uygulama. Flört uygulaması değil. Her profil bir ağaç, insanlar birbirinin ağacına çaput bağlar. Erkekler topluluktaki üç kadının onayıyla katılır.",
       "publisher": {
         "@id": "https://goktigin.com/#org"
       }
@@ -129,7 +129,7 @@
           "name": "Göktigin nedir?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Göktigin (Göktigin Bilişim Teknoloji Ltd. Şti.), Antalya Teknokent'te bulunan bir yazılım stüdyosu. Kendi ürünlerini geliştirip işletiyor: restoranlar için QR menü ve masadan sipariş sistemi Art of Menu ile iOS ve Android'deki sosyal uygulama Chaput."
+            "text": "Göktigin Bilişim Teknoloji Ltd. Şti., Antalya Teknokent'te bir yazılım stüdyosu. Kendi ürünlerimizi yapıyoruz: restoranlar için QR menü ve masadan sipariş sistemi Art of Menu, iOS ve Android için sosyal uygulama Chaput."
           }
         },
         {
@@ -137,7 +137,7 @@
           "name": "Art of Menu nedir?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Art of Menu, Göktigin'in geliştirdiği restoran yazılımı. Misafirler masadaki QR kodu okutarak menüyü görür, sipariş verir ve garson çağırır. İşletme sahibi menüleri, fiyatları, şubeleri, masaları ve çalışanları web panelinden yönetir. Ayrıntılar artofmenu.com adresinde."
+            "text": "Göktigin'in restoran yazılımı. Misafir masadaki QR kodu okutup menüye bakar, sipariş verir, garson çağırır; işletme menüyü, fiyatları, şubeleri, masaları ve ekibi web panelinden yönetir. Ayrıntılar artofmenu.com'da."
           }
         },
         {
@@ -145,7 +145,7 @@
           "name": "Chaput nedir?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Chaput, Göktigin'in iOS ve Android için geliştirdiği, gotikler için kadın öncelikli bir sosyal uygulama. Flört uygulaması değil. Her profil, başkalarının çaput bağlayabildiği bir ağaç; erkekler topluluktaki üç kadının onayıyla katılıyor. Ayrıntılar chaput.app adresinde."
+            "text": "Göktigin'in iOS ve Android için yaptığı, gotik topluluğuna yönelik ve kadınların öncelikli olduğu bir sosyal uygulama. Flört uygulaması değil: her profil, başkalarının çaput bağlayabildiği bir ağaç ve erkekler üç kadının onayıyla katılır. Ayrıntılar chaput.app'te."
           }
         },
         {
@@ -153,7 +153,7 @@
           "name": "Göktigin nerede?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Göktigin, Antalya'daki teknoloji parkı Antalya Teknokent'te bulunuyor."
+            "text": "Antalya'daki teknoloji parkı Antalya Teknokent'te."
           }
         },
         {
@@ -194,8 +194,8 @@
   <main id="top">
     <section class="panel hero" data-scene="hero">
       <p class="prompt"><span class="dim">~/göktigin $</span> whoami</p>
-      <h1>Kodu, insanların kullandığı ürünlere dönüştürüyoruz.</h1>
-      <p class="lede">Göktigin, Antalya Teknokent&#x27;te bir yazılım stüdyosu. Kendi ürünlerimizi tasarlıyor, geliştiriyor ve işletiyoruz: restoran ve kafeler için Art of Menu, iOS ve Android için sosyal uygulama Chaput.</p>
+      <h1>Art of Menu ve Chaput'u yapan stüdyo.</h1>
+      <p class="lede">Antalya Teknokent&#x27;te kendi uygulamalarımızı tasarlıyor, geliştiriyor ve işletiyoruz.</p>
       <div class="actions">
         <a class="btn btn-solid" href="#products">Ürünlerimiz</a>
         <a class="btn btn-line" href="mailto:hello@goktigin.com">hello@goktigin.com</a>
@@ -214,7 +214,8 @@
           <h3 id="p-aom">Art of Menu</h3>
           <span class="tag tag-hot">Yeni</span>
         </div>
-        <p>Art of Menu, restoran ve kafeler için QR menü, masadan sipariş ve fiyatlandırma sistemi. İşletme sahibi menüleri, şubeleri, masaları ve çalışanları tek bir web panelinden yönetir. Fiyatlar saate ve havaya göre değişebilir.</p>
+        <p>Misafir masadaki QR kodu okutur; menüye bakar, sipariş verir, garson çağırır. İşletme menüyü, fiyatları, şubeleri, masaları ve ekibi tek bir web panelinden yönetir. Fiyatlar saate ve havaya göre kendiliğinden değişebilir.</p>
+        <p class="short">Restoran ve kafeler için QR menü, masadan sipariş ve akıllı fiyat.</p>
         <pre class="term"><span class="dim">$</span> build art-of-menu
 <span class="ok">✓</span> qr menü · masadan sipariş · garson çağırma
 <span class="ok">✓</span> akıllı fiyat · saate ve havaya göre
@@ -230,7 +231,8 @@
           <h3 id="p-chaput">Chaput</h3>
           <span class="tag">iOS · Android</span>
         </div>
-        <p>Chaput, gotikler için kadın öncelikli bir sosyal uygulama. Flört uygulaması değil. Her profil bir ağaç; erkekler, topluluktaki üç kadın profillerini onayladıktan sonra katılabiliyor.</p>
+        <p>Gotik topluluğu için, kadınların öncelikli olduğu bir sosyal uygulama. Flört uygulaması değil. Her profil bir ağaç, insanlar birbirinin ağacına çaput bağlar. Erkekler topluluktaki üç kadının onayıyla katılır.</p>
+        <p class="short">Gotikler için kadın öncelikli sosyal uygulama. iOS ve Android&#x27;de.</p>
         <pre class="term"><span class="dim">$</span> build chaput --target ios,android
 <span class="ok">✓</span> profil ağaçları · davetler · başarımlar
 <span class="ok">✓</span> topluluk onayıyla katılım
@@ -245,25 +247,26 @@
           <h3 id="p-benek">Benek</h3>
           <span class="tag tag-mute">Beklemede</span>
         </div>
-        <p>Benek, evcil hayvan sahiplerini güvenebilecekleri bakıcılarla buluşturuyor. Art of Menu ve Chaput&#x27;a odaklandığımız için şimdilik beklemede.</p>
+        <p>Evcil hayvan sahiplerini güvenebilecekleri bakıcılarla buluşturan bir uygulama. Zamanımızı Art of Menu ve Chaput&#x27;a verdiğimiz için şimdilik beklemede.</p>
+        <p class="short">Evcil hayvan sahiplerini güvenilir bakıcılarla buluşturur. Şimdilik beklemede.</p>
         <pre class="term"><span class="dim">$</span> build benek
-<span class="warn">‖</span> beklemede · dalda duruyor</pre>
+<span class="warn">‖</span> şimdilik beklemede</pre>
       </article>
     </section>
     </div>
     <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
-    <p class="swipe-hint">Diğer ürün için kaydır · derlemek için telefona dokun</p>
+    <p class="swipe-hint">Diğer ürünler için kaydır · kodunu görmek için telefona dokun</p>
     </div>
 
     <section id="process" class="panel build" data-scene="emblem">
       <p class="prompt"><span class="dim">$</span> git log --oneline --reverse</p>
       <div class="card">
-        <h2>Nasıl çalışıyoruz</h2>
+        <h2>Her şeyi kendimiz yapıyoruz</h2>
         <ol class="log">
-          <li><code>a1f3e09</code><div><b>Araştırma.</b> Asıl sorunu ve onu çözen en küçük ürünü bulmak.</div></li>
-          <li><code>4c7d21b</code><div><b>Tasarım.</b> Bunu, öğretici gerektirmeden anlaşılan ekranlara dönüştürmek.</div></li>
-          <li><code>9e02b5a</code><div><b>Geliştirme.</b> Web, iOS ve Android için hızlı ve sağlam kod yazmak.</div></li>
-          <li><code>d8b6f14</code><div><b>Yayın.</b> Mağazalara ve web&#x27;e çıkarmak, insanların nasıl kullandığına bakmak, sonra iyileştirmek.</div></li>
+          <li><code>a1f3e09</code><div><b>Tasarım.</b> Her ekranı ve akışı kendimiz tasarlıyoruz.</div></li>
+          <li><code>4c7d21b</code><div><b>Mobil.</b> Chaput tek bir Flutter kod tabanından iOS&#x27;a ve Android&#x27;e çıkıyor.</div></li>
+          <li><code>9e02b5a</code><div><b>Web.</b> Art of Menu&#x27;nun misafir menüsü ve işletme paneli tarayıcıda çalışır, bir şey indirmek gerekmez.</div></li>
+          <li><code>d8b6f14</code><div><b>Sunucu.</b> Sunucuları, ödemeleri ve mağaza yayınlarını da biz yönetiyoruz.</div></li>
         </ol>
       </div>
     </section>
@@ -273,10 +276,10 @@
       <div class="card">
         <h2>Sık sorulanlar</h2>
         <dl class="faq">
-          <div class="qa"><dt>Göktigin nedir?</dt><dd>Göktigin (Göktigin Bilişim Teknoloji Ltd. Şti.), Antalya Teknokent&#x27;te bulunan bir yazılım stüdyosu. Kendi ürünlerini geliştirip işletiyor: restoranlar için QR menü ve masadan sipariş sistemi Art of Menu ile iOS ve Android&#x27;deki sosyal uygulama Chaput.</dd></div>
-          <div class="qa"><dt>Art of Menu nedir?</dt><dd>Art of Menu, Göktigin&#x27;in geliştirdiği restoran yazılımı. Misafirler masadaki QR kodu okutarak menüyü görür, sipariş verir ve garson çağırır. İşletme sahibi menüleri, fiyatları, şubeleri, masaları ve çalışanları web panelinden yönetir. Ayrıntılar artofmenu.com adresinde.</dd></div>
-          <div class="qa"><dt>Chaput nedir?</dt><dd>Chaput, Göktigin&#x27;in iOS ve Android için geliştirdiği, gotikler için kadın öncelikli bir sosyal uygulama. Flört uygulaması değil. Her profil, başkalarının çaput bağlayabildiği bir ağaç; erkekler topluluktaki üç kadının onayıyla katılıyor. Ayrıntılar chaput.app adresinde.</dd></div>
-          <div class="qa"><dt>Göktigin nerede?</dt><dd>Göktigin, Antalya&#x27;daki teknoloji parkı Antalya Teknokent&#x27;te bulunuyor.</dd></div>
+          <div class="qa"><dt>Göktigin nedir?</dt><dd>Göktigin Bilişim Teknoloji Ltd. Şti., Antalya Teknokent&#x27;te bir yazılım stüdyosu. Kendi ürünlerimizi yapıyoruz: restoranlar için QR menü ve masadan sipariş sistemi Art of Menu, iOS ve Android için sosyal uygulama Chaput.</dd></div>
+          <div class="qa"><dt>Art of Menu nedir?</dt><dd>Göktigin&#x27;in restoran yazılımı. Misafir masadaki QR kodu okutup menüye bakar, sipariş verir, garson çağırır; işletme menüyü, fiyatları, şubeleri, masaları ve ekibi web panelinden yönetir. Ayrıntılar artofmenu.com&#x27;da.</dd></div>
+          <div class="qa"><dt>Chaput nedir?</dt><dd>Göktigin&#x27;in iOS ve Android için yaptığı, gotik topluluğuna yönelik ve kadınların öncelikli olduğu bir sosyal uygulama. Flört uygulaması değil: her profil, başkalarının çaput bağlayabildiği bir ağaç ve erkekler üç kadının onayıyla katılır. Ayrıntılar chaput.app&#x27;te.</dd></div>
+          <div class="qa"><dt>Göktigin nerede?</dt><dd>Antalya&#x27;daki teknoloji parkı Antalya Teknokent&#x27;te.</dd></div>
           <div class="qa"><dt>Göktigin&#x27;e nasıl ulaşırım?</dt><dd>hello@goktigin.com adresine yazabilirsiniz. E-postayla dönüş yapıyoruz.</dd></div>
         </dl>
       </div>
@@ -286,7 +289,7 @@
       <p class="prompt"><span class="dim">$</span> contact</p>
       <div class="card">
         <h2>Bize yazın.</h2>
-        <p>Her konuda yazabilirsiniz. E-postayla dönüş yapıyoruz.</p>
+        <p>Ürünlerimizle ilgili bir sorunuz, bir fikriniz ya da başka bir konu: e-posta gönderin, cevap yazalım.</p>
         <a class="mailline" href="mailto:hello@goktigin.com"><span class="dim">$</span> mail hello@goktigin.com<span class="caret"></span></a>
         <address class="addr">Antalya Teknokent, Antalya, Türkiye</address>
       </div>
@@ -312,6 +315,6 @@
   </nav>
 
 
-  <script type="module" src="/script.js?v=29"></script>
+  <script type="module" src="/script.js?v=34"></script>
 </body>
 </html>
