@@ -18,7 +18,7 @@ if "@" not in EMAIL:
 
 SITE = "https://goktigin.com"
 UPDATED_ISO = "2026-11-20"
-V = "34"  # cache-busting version for styles.css and script.js
+V = "36"  # cache-busting version for styles.css and script.js
 
 T = {
   "en": {

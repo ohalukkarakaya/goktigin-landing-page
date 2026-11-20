@@ -55,7 +55,8 @@ async function main() {
   let W = innerWidth, H = innerHeight;
   // Pixel ratio is capped at 1.5 (glyphs stay sharp, a third less fill work than 2x),
   // and drops to 1 on its own if frames keep arriving late.
-  let dprCap = 1.5;
+  // phones: 1.3x is still crisp for 7px glyphs and fills ~25% fewer pixels than 1.5x
+  let dprCap = shell ? 1.3 : 1.5;
   let dpr = Math.min(devicePixelRatio || 1, dprCap);
   const CELL_CSS = touchFirst || W < 820 ? 7 : 8;
   let cellW = 0, cellH = 0;
@@ -200,7 +201,9 @@ async function main() {
   // The full-resolution "real" render exists only while the lens is open.
   const SUB = 3; // scene texels per cell, each axis
   const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
-  const rtReal = new THREE.WebGLRenderTarget(1, 1, { samples: 2, type: THREE.HalfFloatType });
+  // the real render: on phones it is on screen most of the time, so no MSAA there (the
+  // character pass is the look; the real one only has to be clean, not perfect)
+  const rtReal = new THREE.WebGLRenderTarget(1, 1, { samples: shell ? 0 : 2, type: THREE.HalfFloatType });
   const rtCells = new THREE.WebGLRenderTarget(1, 1, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthBuffer: false });
   const codeTex = buildCodeTexture();
   let atlas = null;
@@ -417,7 +420,7 @@ async function main() {
     const cols = Math.ceil(bw / cellW), rows = Math.ceil(bh / cellH);
     rtCells.setSize(cols, rows);
     rt.setSize(cols * SUB, rows * SUB);
-    const realDpr = Math.min(dpr, 1.5);
+    const realDpr = shell ? Math.min(dpr, 1.15) : Math.min(dpr, 1.5);
     rtReal.setSize(Math.round(W * realDpr), Math.round(H * realDpr));
     cellMat.uniforms.uGrid.value.set(cols, rows);
     // a cell's uv span in the scene, matching where the glyph lands on screen
@@ -466,8 +469,12 @@ async function main() {
     lens.x = e.clientX; lens.y = e.clientY;
     lens.target = LENS_R;
   }, { passive: true });
-  document.documentElement.addEventListener('pointerleave', () => { lens.target = 0; });
-  addEventListener('blur', () => { lens.target = 0; });
+  // the mouse leaving closes the lens; a finger lifting fires pointerleave too, so touch is
+  // left alone here (the phone lens closes only on a tap on it or a page change)
+  document.documentElement.addEventListener('pointerleave', (e) => {
+    if (e.pointerType === 'mouse' && !shell) lens.target = 0;
+  });
+  addEventListener('blur', () => { if (shell) closeLens?.(); else lens.target = 0; });
 
   // Touch: the lens only opens on the open stage, never while reading or tapping a control.
   // A plain tap on the device replays the compile sweep.
@@ -738,7 +745,7 @@ async function main() {
       || Math.abs(state.device - state.devT) > 0.02 || Math.abs(state.emblem - state.embT) > 0.02;
     // on phones the hero emblem rides along with the page, so it keeps pace with the scroll
     // phones: the water never stops, so idle there is 30 fps rather than 15
-    const budget = layout.mobile && now < scrollingUntil ? 15 : layout.mobile ? 32 : !focused && !busy ? 120 : busy ? 32 : 64;
+    const budget = layout.mobile && now < scrollingUntil ? 15 : layout.mobile ? (busy ? 32 : 40) : !focused && !busy ? 120 : busy ? 32 : 64;
     if (now - last < budget) { requestAnimationFrame(frame); return; }
     // frames that keep arriving far later than asked mean the GPU is struggling: drop to 1x
     if (busy && dprCap > 1 && (devicePixelRatio || 1) > 1) {
@@ -761,6 +768,7 @@ async function main() {
     state.emblem += (state.embT - state.emblem) * k(3.2);
     state.orbit += (state.orbT - state.orbit) * k(3);
     lens.r += (lens.target - lens.r) * k(10);
+    if (handle && lens.target === 0 && handle.classList.contains('on')) handle.classList.remove('on');
 
     // screen swap with a full turn
     let extra = 0, scramble = Math.pow(1 - intro, 1.6);
@@ -796,10 +804,11 @@ async function main() {
       // The page's text sits right above the tab bar; the stage is whatever is left between
       // the top bar and that text, measured live, so no phone height leaves a hole.
       // The object rides with its page; while the scene hands over it glides to the new spot.
-      const top = page.el.getBoundingClientRect().top;
+      // offsets, not rects: reading them doesn't force a layout pass on every frame
+      const top = page.el.offsetTop - (scroller ? scroller.scrollTop : scrollY);
       // the first child that is actually laid out (hidden prompts and sr-only headings don't count)
       page.first ??= [...page.el.children].find((c) => !c.classList.contains('sr-only') && c.getClientRects().length > 0);
-      const contentTop = page.first ? page.first.getBoundingClientRect().top : top + H * 0.5;
+      const contentTop = page.first ? top + page.first.offsetTop : top + H * 0.5;
       const boxH = THREE.MathUtils.clamp(contentTop - top - layout.boxTop, H * 0.16, H * 0.68);
       const cy = top + layout.boxTop + boxH / 2;
       const ty = layout.halfH * (1 - (2 * cy) / H);
@@ -951,7 +960,7 @@ async function main() {
         const moving = Math.abs(slide.p - Math.round(slide.p)) > 0.01;
         // the moment a swipe starts the phone drops back into characters, and recompiles once it lands
         if (moving && reveal.shown) { reveal.target = 0; reveal.shown = null; }
-        clear = clear && page?.el.id === 'products' && Math.abs(page.el.getBoundingClientRect().top) < 3 && !moving;
+        clear = clear && page?.el.id === 'products' && Math.abs(page.el.offsetTop - scroller.scrollTop) < 3 && !moving;
       }
       if (clear && !shell) {
         // hit-testing is cheap but not free: look again at most every 150 ms
