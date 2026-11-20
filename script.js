@@ -15,9 +15,19 @@ const tickClock = () => { clockEl.textContent = clockFmt.format(new Date()); };
 tickClock();
 setInterval(tickClock, 15000);
 
+/* ── cards rise in as they scroll into view ─────────────── */
+if (!reduced && 'IntersectionObserver' in window) {
+  document.documentElement.classList.add('js-rise');
+  const rise = new IntersectionObserver((entries) => {
+    for (const en of entries) if (en.isIntersecting) { en.target.classList.add('in'); rise.unobserve(en.target); }
+  }, { rootMargin: '0px 0px -12% 0px' });
+  document.querySelectorAll('.build .card, .build .prompt').forEach((el) => rise.observe(el));
+}
+
 main().catch((err) => {
   console.warn('ASCII stage disabled:', err);
   document.getElementById('stage')?.remove();
+  document.documentElement.classList.add('no-stage');
 });
 
 async function main() {
@@ -25,20 +35,13 @@ async function main() {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
   if (!renderer.capabilities.isWebGL2) throw new Error('WebGL2 required');
 
-  await Promise.race([
-    Promise.all([
-      document.fonts.load('700 20px "JetBrains Mono"'),
-      document.fonts.load('500 20px "JetBrains Mono"'),
-      document.fonts.load('700 100px "Qanelas"'),
-    ]),
-    new Promise((r) => setTimeout(r, 2500)),
-  ]);
-
-  const [aomImg, chaputImg, benekImg] = await Promise.all([
-    loadImage(new URL('./assets/screens/artofmenu.webp', import.meta.url).href),
-    loadImage(new URL('./assets/screens/chaput.webp', import.meta.url).href),
-    loadImage(new URL('./assets/screens/benek.jpg', import.meta.url).href),
-  ]);
+  // The first frame never waits on the network: fonts get a short head start, the product
+  // screenshots arrive whenever they arrive (the ASCII faces don't need them).
+  const fontsReady = Promise.all([
+    document.fonts.load('700 20px "JetBrains Mono"'),
+    document.fonts.load('500 20px "JetBrains Mono"'),
+  ]).catch(() => {});
+  await Promise.race([fontsReady, new Promise((r) => setTimeout(r, 350))]);
 
   /* ── sizes ─────────────────────────────────────────── */
   let W = innerWidth, H = innerHeight;
@@ -77,10 +80,22 @@ async function main() {
   // every screen has two faces: the real UI (seen through the lens) and a line drawing of it
   // that the ASCII pass turns into characters
   const screens = {
-    artofmenu: screenTextures((g, w, h) => drawCover(g, aomImg, w, h), drawQr),
-    chaput: screenTextures((g, w, h) => drawCover(g, chaputImg, w, h), drawTree),
-    benek: screenTextures((g, w, h) => drawCover(g, benekImg, w, h), drawPaw),
+    artofmenu: { ascii: canvasTexture(screenCanvas(drawBlank, true)), real: null },
+    chaput: { ascii: canvasTexture(screenCanvas(drawBlank, true)), real: null },
+    benek: { ascii: canvasTexture(screenCanvas(drawBlank, true)), real: null },
   };
+  // Both faces come from the same screenshot: the real one for the lens and the sweep,
+  // and a simplified night version of it that the ASCII pass turns into characters.
+  for (const [name, file] of [['artofmenu', 'artofmenu.webp'], ['chaput', 'chaput.webp'], ['benek', 'benek.jpg']]) {
+    loadImage(new URL(`./assets/screens/${file}`, import.meta.url).href)
+      .then((img) => {
+        const sc = screens[name];
+        sc.ascii.dispose();
+        sc.ascii = canvasTexture(screenCanvas((g, w, h) => drawAsciiFace(g, img, w, h), true));
+        sc.real = canvasTexture(screenCanvas((g, w, h) => drawCover(g, img, w, h), true));
+      })
+      .catch(() => {});
+  }
   let current = 'artofmenu';
   const screenMat = new THREE.MeshBasicMaterial({ map: screens.artofmenu.ascii, transparent: true, toneMapped: false });
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(SW, SH), screenMat);
@@ -260,12 +275,15 @@ async function main() {
       uMouse: { value: new THREE.Vector2(-999, -999) },
       uLens: { value: 0 },
       uDpr: { value: dpr },
+      uRev: { value: new THREE.Vector4() },  // device rect in framebuffer px: x0, y0, x1, y1
+      uRevP: { value: 0 },                   // how far the "compile" sweep has run, top to bottom
     },
     vertexShader: fullscreen,
     fragmentShader: common + /* glsl */`
       uniform sampler2D tCells, tReal, tAtlas;
       uniform vec2 uCell, uMouse;
-      uniform float uLens, uDpr;
+      uniform float uLens, uDpr, uRevP;
+      uniform vec4 uRev;
       in vec2 vUv;
       out vec4 fragColor;
 
@@ -278,6 +296,23 @@ async function main() {
         float m = g > 0.5 ? texture(tAtlas, vec2((g + inC.x) / 95.0, inC.y)).a : 0.0;
         vec3 ink = d0.rgb * m;
         vec3 outc = BG + ink;
+
+        // the sweep: above the line the characters have compiled into the real device
+        if (uRevP > 0.0) {
+          vec2 lo = frag - uRev.xy, hi = uRev.zw - frag;
+          float f = 14.0 * uDpr;
+          float box = smoothstep(0.0, f, min(lo.x, hi.x)) * smoothstep(0.0, f, min(lo.y, hi.y));
+          if (box > 0.0) {
+            float line = mix(uRev.w + f, uRev.y - f, uRevP);
+            float dl = frag.y - line;
+            float done = smoothstep(-1.5 * uDpr, 1.5 * uDpr, dl);
+            outc = mix(outc, max(srgb(texture(tReal, vUv).rgb), BG), done * box);
+            // a hot scanline with a short trail of lit glyphs behind it
+            float run = step(uRevP, 0.999);
+            float beam = exp(-abs(dl) / (2.5 * uDpr)) + 0.6 * exp(-max(-dl, 0.0) / (26.0 * uDpr)) * (1.0 - done) * m;
+            outc += mix(RED, YEL, 0.45 + 0.4 * sin(frag.x * 0.02)) * beam * box * run;
+          }
+        }
 
         float R = uLens;
         if (R >= 1.0) {
@@ -348,20 +383,30 @@ async function main() {
       layout.mobile = false;
       layout.x = 0.4 * halfW; layout.y = -0.05; layout.s = Math.min((halfH * 1.36) / DH, (halfW * 0.62) / 1.1); layout.yaw = -0.28; layout.os = Math.min(layout.s * 0.82, ((halfW - layout.x) * 0.9) / R2);
     } else {
-      // phones: every section keeps a box at its top for the 3D object (see styles.css),
-      // and the object scrolls with that section instead of sitting under the text
+      // phones (see styles.css, same numbers): the hero keeps a box at its top for the emblem,
+      // which scrolls away with it; after that the object is pinned under the bar and the
+      // cards slide up over it, so the screen is never half empty
       layout.mobile = true;
       layout.halfH = halfH;
-      layout.boxTop = Math.max(76, H * 0.07);
-      layout.boxH = H * 0.38;
-      const boxWorld = (layout.boxH / H) * 2 * halfH;
-      layout.s = Math.min((boxWorld * 0.95) / DH, (halfW * 2 * 0.5) / DW);
+      layout.boxTop = (document.querySelector('.bar')?.getBoundingClientRect().bottom || 64) + 2;
+      layout.heroH = H * 0.34;
+      layout.pinH = H * 0.52;
+      const world = (px) => (px / H) * 2 * halfH;
+      layout.s = Math.min((world(layout.pinH) * 0.92) / DH, (halfW * 2 * 0.62) / DW);
+      layout.es = Math.min((world(layout.heroH) * 0.9) / 2, (halfW * 2 * 0.6) / 2);
+      layout.esPin = Math.min((world(layout.pinH) * 0.62) / 2, (halfW * 2 * 0.62) / 2);
       layout.x = 0; layout.yaw = 0;
-      layout.os = Math.min(layout.s * 0.82, (halfW * 0.94) / R2);
+      layout.os = Math.min(layout.es * 0.82, (halfW * 0.94) / R2);
     }
   }
   resize();
   addEventListener('resize', resize);
+  // the glyph atlas is drawn again once the real monospace has arrived
+  fontsReady.then(() => {
+    atlas?.dispose();
+    atlas = buildAtlas(cellW, cellH);
+    post.uniforms.tAtlas.value = atlas;
+  });
 
   /* ── input ─────────────────────────────────────────── */
   const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
@@ -379,50 +424,70 @@ async function main() {
   document.documentElement.addEventListener('pointerleave', () => { lens.target = 0; });
   addEventListener('blur', () => { lens.target = 0; });
 
-  const onTouch = (e) => {
+  // Touch: the lens only opens on the open stage, never while reading or tapping a control.
+  // A plain tap on the device replays the compile sweep.
+  const TEXTY = '.card, h1, .lede, .actions, .prompt, .hint, .bar, .foot, a, button';
+  const touch = { lens: false, moved: false, x: 0, y: 0 };
+  addEventListener('touchstart', (e) => {
     const t = e.touches[0];
     if (!t) return;
-    lens.x = t.clientX; lens.y = t.clientY;
-    lens.target = LENS_R;
+    touch.lens = !(e.target instanceof Element && e.target.closest(TEXTY));
+    touch.moved = false; touch.x = t.clientX; touch.y = t.clientY;
     clearTimeout(lensTimer);
-  };
-  addEventListener('touchstart', onTouch, { passive: true });
-  addEventListener('touchmove', onTouch, { passive: true });
+    if (touch.lens) { lens.x = t.clientX; lens.y = t.clientY; lens.target = LENS_R; }
+  }, { passive: true });
+  addEventListener('touchmove', (e) => {
+    const t = e.touches[0];
+    if (!t) return;
+    if (Math.hypot(t.clientX - touch.x, t.clientY - touch.y) > 10) touch.moved = true;
+    if (touch.lens) { lens.x = t.clientX; lens.y = t.clientY; }
+  }, { passive: true });
   addEventListener('touchend', () => {
     clearTimeout(lensTimer);
     lensTimer = setTimeout(() => { lens.target = 0; }, 450);
-    askForTilt();
+    if (!touch.moved && touch.lens && insideDevice(touch.x, touch.y)) {
+      lens.target = 0;
+      replayReveal();
+    }
   }, { passive: true });
 
-  // tilt on phones
-  let tiltAsked = false;
-  function listenTilt() {
+  // Tilt on phones that hand it over freely (Android). iOS would show a permission dialog
+  // mid-scroll, so there the scroll itself tilts the device instead.
+  if (touchFirst && window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission !== 'function') {
     addEventListener('deviceorientation', (e) => {
       if (e.gamma == null) return;
       pointer.tx = THREE.MathUtils.clamp(e.gamma / 28, -1, 1);
       pointer.ty = THREE.MathUtils.clamp((e.beta - 50) / 28, -1, 1);
     }, { passive: true });
   }
-  function askForTilt() {
-    if (tiltAsked || !touchFirst) return;
-    tiltAsked = true;
-    const D = window.DeviceOrientationEvent;
-    if (D && typeof D.requestPermission === 'function') {
-      D.requestPermission().then((s) => { if (s === 'granted') listenTilt(); }).catch(() => {});
-    } else if (D) listenTilt();
-  }
-  if (touchFirst && window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission !== 'function') {
-    tiltAsked = true;
-    listenTilt();
-  }
 
   /* ── scenes driven by scroll ───────────────────────── */
   const state = { scene: 'hero', device: 0, emblem: 0, orbit: 0, devT: 0, embT: 1, orbT: 1 };
   let spin = null; // { t0, to, swapped }
+  let sceneAt = 0;
+  const PRODUCTS = new Set(['artofmenu', 'chaput', 'benek']);
+
+  // Phones get the lens's payoff without having to find it: once a product sits still in view,
+  // a scanline compiles its characters into the real screen, holds, then decompiles.
+  const autoReveal = touchFirst || innerWidth <= 820;
+  const reveal = { p: 0, target: 0, clearSince: 0, until: 0, shown: null };
+  const devRect = { x0: 0, y0: 0, x1: 0, y1: 0, ok: false }; // css px, top-left origin
+  const hit = { at: 0, covered: false };
+  function insideDevice(x, y) {
+    return devRect.ok && x > devRect.x0 && x < devRect.x1 && y > devRect.y0 && y < devRect.y1;
+  }
+  function replayReveal() {
+    if (!PRODUCTS.has(state.scene) || !screens[current].real) return;
+    reveal.target = 1; reveal.shown = state.scene;
+    reveal.until = performance.now() + 4200;
+    poke();
+  }
+
   function setScene(name) {
     if (name === state.scene) return;
     const prev = state.scene;
     state.scene = name;
+    sceneAt = performance.now();
     state.orbT = name === 'hero' ? 1 : 0;
     if (name === 'hero' || name === 'emblem') { state.devT = 0; state.embT = 1; return; }
     state.devT = 1; state.embT = 0;
@@ -431,10 +496,10 @@ async function main() {
   }
   // Render budget: 30 fps while someone interacts, 15 fps when the page just idles,
   // 8 fps when the window is in the background but still on screen.
-  let activeUntil = 0;
-  const poke = () => { activeUntil = performance.now() + 1600; };
+  let activeUntil = 0, scrollingUntil = 0;
+  function poke() { activeUntil = performance.now() + 1600; }
   addEventListener('pointermove', poke, { passive: true });
-  addEventListener('scroll', poke, { passive: true });
+  addEventListener('scroll', () => { poke(); scrollingUntil = performance.now() + 220; }, { passive: true });
   addEventListener('touchmove', poke, { passive: true });
   addEventListener('wheel', poke, { passive: true });
   let focused = document.hasFocus();
@@ -443,7 +508,9 @@ async function main() {
   let lateFrames = 0, timedFrames = 0;
 
   let activeEl = document.querySelector('[data-scene]');
+  const heroEl = document.querySelector('.hero') || activeEl;
   let anchored = false;
+  let lastScrollY = scrollY, scrollLean = 0;
   const io = new IntersectionObserver((entries) => {
     for (const en of entries) if (en.isIntersecting) { activeEl = en.target; setScene(en.target.dataset.scene); }
   }, { rootMargin: '-45% 0px -45% 0px' });
@@ -464,9 +531,10 @@ async function main() {
 
   function frame(now) {
     if (!running) return;
-    const busy = now < activeUntil || spin || intro < 1 || lens.r > 1
+    const busy = now < activeUntil || spin || intro < 1 || lens.r > 1 || reveal.p > 0
       || Math.abs(state.device - state.devT) > 0.02 || Math.abs(state.emblem - state.embT) > 0.02;
-    const budget = !focused && !busy ? 120 : busy ? 32 : 64;
+    // on phones the hero emblem rides along with the page, so it keeps pace with the scroll
+    const budget = layout.mobile && now < scrollingUntil ? 15 : !focused && !busy ? 120 : busy ? 32 : 64;
     if (now - last < budget) { requestAnimationFrame(frame); return; }
     // frames that keep arriving far later than asked mean the GPU is struggling: drop to 1x
     if (busy && dprCap > 1 && (devicePixelRatio || 1) > 1) {
@@ -501,10 +569,21 @@ async function main() {
     }
     scramble = Math.max(scramble, Math.sin(Math.PI * Math.min(state.emblem, 1)) * 0.35);
 
+    // scrolling leans the device and the emblem, as if they had a little weight
+    const sy = scrollY;
+    const vel = (sy - lastScrollY) / Math.max(dt, 1 / 120);
+    lastScrollY = sy;
+    scrollLean += (THREE.MathUtils.clamp(vel / 2600, -0.45, 0.45) - scrollLean) * k(5);
+
     if (layout.mobile && activeEl) {
-      const cy = activeEl.getBoundingClientRect().top + layout.boxTop + layout.boxH / 2;
+      const hero = state.scene === 'hero';
+      const cy = hero
+        ? heroEl.getBoundingClientRect().top + layout.boxTop + layout.heroH / 2
+        : layout.boxTop + layout.pinH / 2;
       const ty = layout.halfH * (1 - (2 * cy) / H);
-      layout.y = anchored ? layout.y + (ty - layout.y) * k(9) : ty;
+      // glued to the page on the hero, eased while it hands over to the pinned spot
+      const rate = hero && now - sceneAt > 700 ? 40 : 6;
+      layout.y = anchored ? layout.y + (ty - layout.y) * k(rate) : ty;
       anchored = true;
     }
 
@@ -513,7 +592,7 @@ async function main() {
     device.scale.setScalar(layout.s * (0.6 + 0.4 * dv));
     device.position.set(layout.x, layout.y + Math.sin(t * 0.8) * 0.04 - (1 - dv) * 0.6, 0);
     device.rotation.set(
-      -pointer.y * 0.28 + Math.sin(t * 0.5) * 0.04,
+      -pointer.y * 0.28 + Math.sin(t * 0.5) * 0.04 + scrollLean,
       layout.yaw + pointer.x * 0.5 + Math.sin(t * 0.35) * 0.16 + extra,
       Math.sin(t * 0.4) * 0.02,
     );
@@ -531,8 +610,10 @@ async function main() {
     emblem.visible = ev > 0.01;
     if (emblem.visible) {
       emblem.position.set(layout.x, layout.y, 0);
-      emblem.scale.setScalar(layout.s * (layout.mobile ? 0.95 : 1.25 - 0.3 * Math.max(0, Math.min(1, state.orbit))));
-      emblem.rotation.set(-pointer.y * 0.3, layout.yaw * 0.6 + pointer.x * 0.6 + Math.sin(t * 0.45) * 0.35, 0);
+      emblem.scale.setScalar(layout.mobile
+        ? THREE.MathUtils.lerp(layout.esPin, layout.es, THREE.MathUtils.clamp(state.orbit, 0, 1))
+        : layout.s * (1.25 - 0.3 * Math.max(0, Math.min(1, state.orbit))));
+      emblem.rotation.set(-pointer.y * 0.3 + scrollLean * 0.8,layout.yaw * 0.6 + pointer.x * 0.6 + Math.sin(t * 0.45) * 0.35, 0);
       EMBLEM.forEach((_, i) => {
         const { p, h } = voxBase[i];
         const e = easeOut(THREE.MathUtils.clamp((ev - voxDelay[i]) / (1 - voxDelay[i] * 0.9), 0, 1));
@@ -573,13 +654,57 @@ async function main() {
     u.uLens.value = lens.r < 1 ? 0 : lens.r * dpr;
     u.uMouse.value.set(lens.x * dpr, (H - lens.y) * dpr);
 
+    // where the device sits on screen (for the sweep and for taps)
+    devRect.ok = false;
+    if (device.visible && dv > 0.97) {
+      device.updateMatrixWorld();
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (const cx of [-DW / 2, DW / 2]) for (const cy of [-DH / 2, DH / 2]) for (const cz of [-DD / 2, DD / 2]) {
+        tmpV.set(cx, cy, cz).applyMatrix4(device.matrixWorld).project(camera);
+        const px = (tmpV.x * 0.5 + 0.5) * W, py = (0.5 - tmpV.y * 0.5) * H;
+        x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py);
+      }
+      Object.assign(devRect, { x0: x0 - 6, y0: y0 - 6, x1: x1 + 6, y1: y1 + 6, ok: true });
+    }
+
+    if (autoReveal) {
+      // the device has to be fully in the clear: nothing scrolled over it, not mid-swap
+      let clear = PRODUCTS.has(state.scene) && !spin && current === state.scene && devRect.ok && !!screens[current].real;
+      if (clear) {
+        // hit-testing is cheap but not free: look again at most every 150 ms
+        if (now - hit.at > 150) {
+          hit.at = now; hit.covered = false;
+          const cx = (devRect.x0 + devRect.x1) / 2;
+          for (const fy of [0.08, 0.5, 0.92]) {
+            const el = document.elementFromPoint(cx, devRect.y0 + (devRect.y1 - devRect.y0) * fy);
+            if (el && el.closest('.card, .prompt, .foot')) { hit.covered = true; break; }
+          }
+        }
+        clear = !hit.covered;
+      }
+      if (!clear) {
+        reveal.clearSince = 0;
+        if (reveal.shown !== state.scene || spin) { reveal.target = 0; reveal.shown = null; }
+      } else {
+        if (!reveal.clearSince) reveal.clearSince = now;
+        if (reveal.shown !== state.scene && now - reveal.clearSince > 550) replayReveal();
+      }
+      if (reveal.target === 1 && now > reveal.until) reveal.target = 0;
+    } else {
+      reveal.target = 0;
+    }
+    reveal.p = THREE.MathUtils.clamp(reveal.p + (reveal.target ? dt / 0.9 : -dt / 0.55), 0, 1);
+    if (!devRect.ok) reveal.p = 0;
+    u.uRevP.value = reveal.p > 0 ? easeInOut(reveal.p) : 0;
+    u.uRev.value.set(devRect.x0 * dpr, (H - devRect.y1) * dpr, devRect.x1 * dpr, (H - devRect.y0) * dpr);
+
     renderer.setClearColor(0x000000, 1);
     screenMat.map = screens[current].ascii;
     renderer.setRenderTarget(rt);
     renderer.clear();
     renderer.render(scene, camera);
-    if (lens.r >= 1) {
-      screenMat.map = screens[current].real;
+    if (lens.r >= 1 || reveal.p > 0) {
+      screenMat.map = screens[current].real || screens[current].ascii;
       renderer.setRenderTarget(rtReal);
       renderer.clear();
       renderer.render(scene, camera);
@@ -594,13 +719,6 @@ async function main() {
   requestAnimationFrame(frame);
 
   /* ── helpers ───────────────────────────────────────── */
-  function screenTextures(drawReal, drawSign) {
-    return {
-      real: canvasTexture(screenCanvas(drawReal, true)),
-      ascii: canvasTexture(screenCanvas(drawSign, true)),
-    };
-  }
-
   function canvasTexture(c) {
     const tex = new THREE.CanvasTexture(c);
     tex.colorSpace = THREE.SRGBColorSpace;
@@ -626,22 +744,6 @@ async function main() {
     return c;
   }
 
-  function drawBenek(g, w, h) {
-    g.fillStyle = '#f3ede3';
-    g.fillRect(0, 0, w, h);
-    const spots = [[90, 230, 34], [400, 180, 22], [470, 420, 40], [70, 560, 18], [180, 380, 12], [360, 700, 30], [120, 900, 38], [430, 980, 20], [260, 1110, 14], [300, 260, 10]];
-    g.fillStyle = '#2b2520';
-    for (const [x, y, r] of spots) { g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); }
-    g.fillStyle = '#2b2520';
-    g.font = '700 120px "Qanelas", sans-serif';
-    g.textAlign = 'center';
-    g.textBaseline = 'middle';
-    g.fillText('benek', w / 2, h * 0.5);
-    g.font = '500 26px "JetBrains Mono", monospace';
-    g.fillStyle = '#8c8379';
-    g.fillText('— paused —', w / 2, h * 0.5 + 92);
-  }
-
   function drawBack(g, w, h) {
     g.fillStyle = '#1d1a17';
     g.fillRect(0, 0, w, h);
@@ -655,103 +757,45 @@ async function main() {
   }
 }
 
-/* ── product signs: bold shapes that read well as characters ── */
-const SIGN_BG = '#070707';
-const SIGN_INK = '#f2ede4';
-
-function drawQr(g, w, h) {
-  g.fillStyle = SIGN_BG;
+/* ── the ASCII face of a screen ──────────────────────────
+   The real UI, simplified so it reads as characters: light, colourless surfaces
+   (backgrounds, cards) go dark and dark text goes bright, while photos and accent
+   colours keep their hue. Half resolution plus a soft blur drops the fine print
+   and keeps the layout: bars, cards, rows of text, pictures. */
+function drawBlank(g, w, h) {
+  g.fillStyle = '#070707';
   g.fillRect(0, 0, w, h);
-  // a chunky 13x13 code so every module survives the character grid
-  const rows = [
-    '11111 0 11111',
-    '10001 1 10001',
-    '10101 0 10101',
-    '10001 1 10001',
-    '11111 0 11111',
-    '0000010100000',
-    '1011101101101',
-    '0000001011010',
-    '11111 1 01101',
-    '10001 0 11010',
-    '10101 1 00111',
-    '10001 0 11011',
-    '11111 1 10101',
-  ].map((r) => r.replace(/ /g, '0'));
-  const n = 13, size = w * 0.76, m = size / n;
-  const ox = (w - size) / 2, oy = h * 0.44 - size / 2;
-  const finder = (x, y) => (x < 5 && y < 5) || (x > 7 && y < 5) || (x < 5 && y > 7);
-  for (let y = 0; y < n; y++) {
-    for (let x = 0; x < n; x++) {
-      if (rows[y][x] !== '1') continue;
-      g.fillStyle = finder(x, y) ? '#fbab02' : SIGN_INK;
-      g.fillRect(ox + x * m, oy + y * m, m + 0.5, m + 0.5);
-    }
-  }
-  // a plate and cloche under the code
-  const cy = oy + size + 190;
-  g.fillStyle = SIGN_INK;
-  g.beginPath();
-  g.ellipse(w / 2, cy, 170, 18, 0, 0, Math.PI * 2);
-  g.fill();
-  g.beginPath();
-  g.arc(w / 2, cy - 14, 122, Math.PI, 0);
-  g.closePath();
-  g.fillStyle = '#b9b2a7';
-  g.fill();
-  g.fillStyle = SIGN_INK;
-  g.fillRect(w / 2 - 14, cy - 162, 28, 28);
 }
 
-function drawTree(g, w, h) {
-  g.fillStyle = SIGN_BG;
-  g.fillRect(0, 0, w, h);
-  const cx = w / 2, base = h * 0.8;
-  // trunk and branches
-  g.strokeStyle = '#9a7a5c';
-  g.lineCap = 'round';
-  g.lineWidth = 44;
-  g.beginPath(); g.moveTo(cx, base); g.lineTo(cx, base - 380); g.stroke();
-  g.lineWidth = 20;
-  for (const [dx, dy, ex, ey] of [[0, -230, -150, -360], [0, -290, 160, -410], [0, -360, -90, -500]]) {
-    g.beginPath(); g.moveTo(cx + dx, base + dy); g.lineTo(cx + ex, base + ey); g.stroke();
+function drawAsciiFace(g, img, w, h) {
+  const sw = Math.round(w / 3), sh = Math.round(h / 3);
+  const c = document.createElement('canvas');
+  c.width = sw; c.height = sh;
+  const x = c.getContext('2d', { willReadFrequently: true });
+  x.filter = 'blur(0.6px)';
+  drawCover(x, img, sw, sh);
+  const im = x.getImageData(0, 0, sw, sh), d = im.data;
+  // how light each pixel's neighbourhood is: only light areas get flipped,
+  // so a dark panel keeps its bright text instead of turning into a wall
+  x.filter = 'blur(7px)';
+  drawCover(x, img, sw, sh);
+  const area = x.getImageData(0, 0, sw, sh).data;
+  const sm = (a, b, v) => { const t = Math.min(Math.max((v - a) / (b - a), 0), 1); return t * t * (3 - 2 * t); };
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i] / 255, gg = d[i + 1] / 255, b = d[i + 2] / 255;
+    const mx = Math.max(r, gg, b), mn = Math.min(r, gg, b);
+    const L = 0.2126 * r + 0.7152 * gg + 0.0722 * b;
+    const A = (0.2126 * area[i] + 0.7152 * area[i + 1] + 0.0722 * area[i + 2]) / 255;
+    // light, colourless surroundings flip (smart invert); colour and dark areas stay
+    const flip = sm(0.4, 0.62, A) * (1 - sm(0.1, 0.35, mx - mn));
+    const shift = (1 - 2 * L) * flip;
+    // a touch of contrast so near-white backgrounds fall all the way to black
+    const k = (v) => Math.min(Math.max(((v + shift) - 0.08) * 1.25, 0), 1) * 255;
+    d[i] = k(r); d[i + 1] = k(gg); d[i + 2] = k(b);
   }
-  // canopy
-  const blobs = [[0, -620, 175], [-150, -520, 135], [150, -540, 140], [-60, -470, 120], [80, -440, 115], [0, -760, 115]];
-  for (const [dx, dy, r] of blobs) {
-    const grd = g.createRadialGradient(cx + dx - r * 0.3, base + dy - r * 0.4, r * 0.1, cx + dx, base + dy, r);
-    grd.addColorStop(0, SIGN_INK);
-    grd.addColorStop(1, '#8d877d');
-    g.fillStyle = grd;
-    g.beginPath(); g.arc(cx + dx, base + dy, r, 0, Math.PI * 2); g.fill();
-  }
-  // the chaputs: rags tied under the canopy
-  const rags = [[-150, -360, '#f2361c'], [160, -405, '#fbab02'], [-90, -330, '#fa8a02'], [95, -330, '#f2361c'], [-200, -420, '#fbab02']];
-  for (const [dx, dy, col] of rags) {
-    g.fillStyle = col;
-    g.save();
-    g.translate(cx + dx, base + dy);
-    g.rotate(dx > 0 ? 0.12 : -0.12);
-    g.fillRect(-11, 0, 22, 84);
-    g.restore();
-  }
-  g.fillStyle = '#6d675f';
-  g.fillRect(cx - 190, base, 380, 14);
-}
-
-function drawPaw(g, w, h) {
-  g.fillStyle = SIGN_BG;
-  g.fillRect(0, 0, w, h);
-  const cx = w / 2, cy = h * 0.54;
-  g.fillStyle = SIGN_INK;
-  g.beginPath(); g.ellipse(cx, cy + 40, 150, 125, 0, 0, Math.PI * 2); g.fill();
-  for (const [dx, dy, rx, ry, rot] of [[-165, -120, 52, 70, -0.35], [-62, -205, 56, 76, -0.1], [62, -205, 56, 76, 0.1], [165, -120, 52, 70, 0.35]]) {
-    g.beginPath(); g.ellipse(cx + dx, cy + dy, rx, ry, rot, 0, Math.PI * 2); g.fill();
-  }
-  g.fillStyle = '#5f5a53';
-  for (const [x, y, r] of [[80, 220, 26], [440, 300, 18], [110, 960, 22], [450, 1010, 30], [300, 1120, 12], [60, 640, 12]]) {
-    g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
-  }
+  x.putImageData(im, 0, 0);
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(c, 0, 0, w, h);
 }
 
 /* ── module helpers ───────────────────────────────────── */
