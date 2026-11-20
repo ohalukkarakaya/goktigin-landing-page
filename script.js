@@ -35,9 +35,9 @@ async function main() {
   ]);
 
   const [aomImg, chaputImg, benekImg] = await Promise.all([
-    loadImage('assets/screens/artofmenu.webp'),
-    loadImage('assets/screens/chaput.webp'),
-    loadImage('assets/screens/benek.jpg'),
+    loadImage(new URL('./assets/screens/artofmenu.webp', import.meta.url).href),
+    loadImage(new URL('./assets/screens/chaput.webp', import.meta.url).href),
+    loadImage(new URL('./assets/screens/benek.jpg', import.meta.url).href),
   ]);
 
   /* ── sizes ─────────────────────────────────────────── */

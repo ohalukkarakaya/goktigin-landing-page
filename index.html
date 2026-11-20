@@ -3,20 +3,166 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Göktigin · Software Studio</title>
-  <meta name="description" content="Göktigin is a software studio in Antalya Teknokent. We design, build and ship our own products: Art of Menu, Chaput and Benek.">
+  <script>
+    // First visit: open the page in the browser's language. A language picked with the switch wins.
+    // Crawlers are never redirected, so both language versions stay indexable.
+    (function () {
+      try {
+        if (/bot|crawl|spider|slurp|mediapartners|lighthouse|headless|preview/i.test(navigator.userAgent)) return;
+        var here = document.documentElement.lang;
+        var picked = null;
+        try { picked = localStorage.getItem('gk-lang'); } catch (e) {}
+        var want = picked || (/^tr\b/i.test(navigator.language || '') ? 'tr' : 'en');
+        if (want !== here) location.replace((want === 'tr' ? '/tr/' : '/') + location.hash);
+      } catch (e) {}
+    })();
+  </script>
+  <title>Göktigin: the software studio behind Art of Menu and Chaput</title>
+  <meta name="description" content="Göktigin is a software studio in Antalya Teknokent, Turkey. We build and run our own products: Art of Menu for restaurants and Chaput, a social app for iOS and Android.">
+  <link rel="canonical" href="https://goktigin.com/">
+  <link rel="alternate" hreflang="en" href="https://goktigin.com/">
+  <link rel="alternate" hreflang="tr" href="https://goktigin.com/tr/">
+  <link rel="alternate" hreflang="x-default" href="https://goktigin.com/">
+  <meta name="robots" content="index, follow, max-image-preview:large">
   <meta name="theme-color" content="#0b0a09">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Göktigin">
+  <meta property="og:url" content="https://goktigin.com/">
+  <meta property="og:title" content="Göktigin · Software studio in Antalya">
+  <meta property="og:description" content="Göktigin is a software studio in Antalya Teknokent, Turkey. We build and run our own products: Art of Menu for restaurants and Chaput, a social app for iOS and Android.">
+  <meta property="og:image" content="https://goktigin.com/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Göktigin">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="tr_TR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Göktigin · Software studio in Antalya">
+  <meta name="twitter:description" content="Göktigin is a software studio in Antalya Teknokent, Turkey. We build and run our own products: Art of Menu for restaurants and Chaput, a social app for iOS and Android.">
+  <meta name="twitter:image" content="https://goktigin.com/assets/og.png">
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+  <link rel="alternate icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="preload" href="assets/fonts/QanelasBold.otf" as="font" type="font/otf" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="preload" href="/assets/fonts/QanelasBold.otf" as="font" type="font/otf" crossorigin>
+  <link rel="stylesheet" href="/styles.css?v=8">
   <script type="importmap">
     { "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
     } }
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://goktigin.com/#org",
+      "name": "Göktigin",
+      "legalName": "Göktigin Bilişim Teknoloji Ltd. Şti.",
+      "url": "https://goktigin.com/",
+      "logo": "https://goktigin.com/assets/icon-512.png",
+      "email": "hello@goktigin.com",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Antalya Teknokent",
+        "addressLocality": "Antalya",
+        "addressCountry": "TR"
+      },
+      "description": "Göktigin is a software studio in Antalya Teknokent, Turkey. We build and run our own products: Art of Menu for restaurants and Chaput, a social app for iOS and Android."
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://goktigin.com/#website",
+      "url": "https://goktigin.com/",
+      "name": "Göktigin",
+      "inLanguage": "en",
+      "publisher": {
+        "@id": "https://goktigin.com/#org"
+      },
+      "dateModified": "2026-11-20"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://goktigin.com/#artofmenu",
+      "name": "Art of Menu",
+      "url": "https://artofmenu.com",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "description": "Art of Menu runs QR menus, table ordering and pricing for restaurants and cafés. Owners manage menus, branches, tables and staff from one web panel, and prices can follow the hour and the weather.",
+      "publisher": {
+        "@id": "https://goktigin.com/#org"
+      }
+    },
+    {
+      "@type": "MobileApplication",
+      "@id": "https://goktigin.com/#chaput",
+      "name": "Chaput",
+      "url": "https://chaput.app",
+      "applicationCategory": "SocialNetworkingApplication",
+      "operatingSystem": "iOS, Android",
+      "description": "Chaput is a women-first social app for goths. It isn't a dating app. Every profile is a tree, and men join after three women in the community approve them.",
+      "publisher": {
+        "@id": "https://goktigin.com/#org"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://goktigin.com/#faq",
+      "inLanguage": "en",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Göktigin?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Göktigin (Göktigin Bilişim Teknoloji Ltd. Şti.) is a software studio based in Antalya Teknokent, Turkey. It builds and runs its own products: Art of Menu, a QR menu and table ordering system for restaurants, and Chaput, a social app for iOS and Android."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Art of Menu?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Art of Menu is restaurant software made by Göktigin. Guests scan a QR code at the table to read the menu, order and call a waiter. Owners manage menus, prices, branches, tables and staff from a web panel. Details are at artofmenu.com."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Chaput?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Chaput is a women-first social app for goths, made by Göktigin for iOS and Android. It is not a dating app. Each profile is a tree that others can tie a chaput to, and men join after three women in the community approve them. Details are at chaput.app."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where is Göktigin based?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Göktigin is based at Antalya Teknokent, the technology park in Antalya, Turkey."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I contact Göktigin?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Write to hello@goktigin.com. We reply by email."
+          }
+        }
+      ]
+    }
+  ]
+}
   </script>
 </head>
 <body>
@@ -24,14 +170,17 @@
 
   <header class="bar">
     <a class="brand" href="#top" aria-label="Göktigin home">
-      <img src="assets/emblem.svg" alt="" width="26" height="27">
+      <img src="/assets/emblem.svg" alt="" width="26" height="27">
       <span>Göktigin</span>
     </a>
-    <nav class="links">
+    <nav class="links" aria-label="Sections">
       <a href="#products">Products</a>
       <a href="#process">Process</a>
+      <a href="#faq">FAQ</a>
       <a href="#contact">Contact</a>
     </nav>
+    <a class="lang" href="/tr/" hreflang="tr" lang="tr" title="Türkçe"
+       onclick="try{localStorage.setItem('gk-lang','tr')}catch(e){}">TR</a>
     <div class="flag" aria-label="Studio status">
       <i></i><span>ANTALYA <b id="clock">--:--</b></span>
     </div>
@@ -41,58 +190,59 @@
     <section class="panel hero" data-scene="hero">
       <p class="prompt"><span class="dim">~/göktigin $</span> whoami</p>
       <h1>We turn code into products people&nbsp;use.</h1>
-      <p class="lede">Göktigin is a software studio in Antalya Teknokent. We design, build and ship our own products, on the web, the App Store and Google Play.</p>
+      <p class="lede">Göktigin is a software studio in Antalya Teknokent, Turkey. We design, build and run our own products: Art of Menu for restaurants and cafés, and Chaput, a social app for iOS and Android.</p>
       <div class="actions">
         <a class="btn btn-solid" href="#products">See our products</a>
         <a class="btn btn-line" href="mailto:hello@goktigin.com">hello@goktigin.com</a>
       </div>
-      <p class="hint"><span class="lens-dot"></span><span class="hint-desktop">Move your cursor: the lens compiles the characters into the real screen.</span><span class="hint-touch">Touch and drag: the lens compiles the characters into the real screen.</span></p>
+      <p class="hint"><span class="lens-dot"></span><span class="hint-desktop">Move your cursor over the characters. Under the lens they turn back into the real screen.</span><span class="hint-touch">Touch and drag over the characters. Under the lens they turn back into the real screen.</span></p>
     </section>
 
     <div id="products" class="anchor"></div>
+    <h2 class="sr-only">Our products</h2>
 
-    <section class="panel build" data-scene="artofmenu">
+    <section class="panel build" data-scene="artofmenu" aria-labelledby="p-aom">
       <p class="prompt"><span class="dim">$</span> ls ./products <span class="dim">· 01 / 03</span></p>
-      <div class="card">
+      <article class="card">
         <div class="card-head">
-          <h2>Art of Menu</h2>
+          <h3 id="p-aom">Art of Menu</h3>
           <span class="tag tag-hot">New</span>
         </div>
-        <p>QR menus, table ordering and smart pricing for restaurants and cafés. One panel for menus, branches, tables and staff, with prices that learn from the day.</p>
+        <p>Art of Menu runs QR menus, table ordering and pricing for restaurants and cafés. Owners manage menus, branches, tables and staff from one web panel, and prices can follow the hour and the weather.</p>
         <pre class="term"><span class="dim">$</span> build art-of-menu
 <span class="ok">✓</span> qr menu · table ordering · waiter calls
 <span class="ok">✓</span> smart pricing · weather &amp; hour targeting
 <span class="ok">✓</span> web panel · menus, branches, staff
 <span class="go">→</span> <a href="https://artofmenu.com" target="_blank" rel="noopener">artofmenu.com</a></pre>
-      </div>
+      </article>
     </section>
 
-    <section class="panel build" data-scene="chaput">
+    <section class="panel build" data-scene="chaput" aria-labelledby="p-chaput">
       <p class="prompt"><span class="dim">$</span> ls ./products <span class="dim">· 02 / 03</span></p>
-      <div class="card">
+      <article class="card">
         <div class="card-head">
-          <h2>Chaput</h2>
+          <h3 id="p-chaput">Chaput</h3>
           <span class="tag">iOS · Android</span>
         </div>
-        <p>A women-first, safe social app for goths. Not a dating app: every profile is a tree, and new members are vouched in by the community.</p>
+        <p>Chaput is a women-first social app for goths. It isn&#x27;t a dating app. Every profile is a tree, and men join after three women in the community approve them.</p>
         <pre class="term"><span class="dim">$</span> build chaput --target ios,android
 <span class="ok">✓</span> profile trees · invites · achievements
 <span class="ok">✓</span> community admission
 <span class="go">→</span> <a href="https://chaput.app" target="_blank" rel="noopener">chaput.app</a></pre>
-      </div>
+      </article>
     </section>
 
-    <section class="panel build" data-scene="benek">
+    <section class="panel build" data-scene="benek" aria-labelledby="p-benek">
       <p class="prompt"><span class="dim">$</span> ls ./products <span class="dim">· 03 / 03</span></p>
-      <div class="card">
+      <article class="card">
         <div class="card-head">
-          <h2>Benek</h2>
+          <h3 id="p-benek">Benek</h3>
           <span class="tag tag-mute">Paused</span>
         </div>
-        <p>A pet care concept. Benek is on hold while we focus on our live products.</p>
+        <p>Benek connects pet owners with sitters they can trust. It is on hold while we focus on Art of Menu and Chaput.</p>
         <pre class="term"><span class="dim">$</span> build benek
 <span class="warn">‖</span> paused · waiting in the branch</pre>
-      </div>
+      </article>
     </section>
 
     <section id="process" class="panel build" data-scene="emblem">
@@ -101,10 +251,24 @@
         <h2>How we build</h2>
         <ol class="log">
           <li><code>a1f3e09</code><div><b>Research.</b> Find the real problem and the smallest product that solves it.</div></li>
-          <li><code>4c7d21b</code><div><b>Design.</b> Turn it into flows and an interface that feels obvious.</div></li>
-          <li><code>9e02b5a</code><div><b>Build.</b> Fast, stable code across the web, iOS and Android.</div></li>
-          <li><code>d8b6f14</code><div><b>Ship.</b> Release to the stores and the web, listen, iterate.</div></li>
+          <li><code>4c7d21b</code><div><b>Design.</b> Turn it into screens people understand without a tutorial.</div></li>
+          <li><code>9e02b5a</code><div><b>Build.</b> Write fast, stable code for the web, iOS and Android.</div></li>
+          <li><code>d8b6f14</code><div><b>Ship.</b> Release to the stores and the web, watch how people use it, then improve it.</div></li>
         </ol>
+      </div>
+    </section>
+
+    <section id="faq" class="panel build" data-scene="emblem">
+      <p class="prompt"><span class="dim">$</span> man göktigin</p>
+      <div class="card">
+        <h2>Questions</h2>
+        <dl class="faq">
+          <div class="qa"><dt>What is Göktigin?</dt><dd>Göktigin (Göktigin Bilişim Teknoloji Ltd. Şti.) is a software studio based in Antalya Teknokent, Turkey. It builds and runs its own products: Art of Menu, a QR menu and table ordering system for restaurants, and Chaput, a social app for iOS and Android.</dd></div>
+          <div class="qa"><dt>What is Art of Menu?</dt><dd>Art of Menu is restaurant software made by Göktigin. Guests scan a QR code at the table to read the menu, order and call a waiter. Owners manage menus, prices, branches, tables and staff from a web panel. Details are at artofmenu.com.</dd></div>
+          <div class="qa"><dt>What is Chaput?</dt><dd>Chaput is a women-first social app for goths, made by Göktigin for iOS and Android. It is not a dating app. Each profile is a tree that others can tie a chaput to, and men join after three women in the community approve them. Details are at chaput.app.</dd></div>
+          <div class="qa"><dt>Where is Göktigin based?</dt><dd>Göktigin is based at Antalya Teknokent, the technology park in Antalya, Turkey.</dd></div>
+          <div class="qa"><dt>How do I contact Göktigin?</dt><dd>Write to hello@goktigin.com. We reply by email.</dd></div>
+        </dl>
       </div>
     </section>
 
@@ -112,18 +276,19 @@
       <p class="prompt"><span class="dim">$</span> contact</p>
       <div class="card">
         <h2>Say hello.</h2>
-        <p>Reach us about anything. We answer by email and keep it simple.</p>
+        <p>Write to us about anything. We reply by email.</p>
         <a class="mailline" href="mailto:hello@goktigin.com"><span class="dim">$</span> mail hello@goktigin.com<span class="caret"></span></a>
-        <p class="addr">Antalya Teknokent, Turkey</p>
+        <address class="addr">Antalya Teknokent, Antalya, Turkey</address>
       </div>
     </section>
   </main>
 
   <footer class="foot">
     <span>© 2026 Göktigin Bilişim Teknoloji Ltd. Şti.</span>
+    <span><time datetime="2026-11-20">Last updated 20 November 2026</time></span>
     <a href="mailto:hello@goktigin.com">hello@goktigin.com</a>
   </footer>
 
-  <script type="module" src="script.js?v=6"></script>
+  <script type="module" src="/script.js?v=8"></script>
 </body>
 </html>

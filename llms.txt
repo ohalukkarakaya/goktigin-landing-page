@@ -1,0 +1,41 @@
+# Göktigin
+
+> Göktigin is a software studio in Antalya Teknokent, Turkey. We build and run our own products: Art of Menu for restaurants and Chaput, a social app for iOS and Android.
+
+Legal name: Göktigin Bilişim Teknoloji Ltd. Şti.
+Location: Antalya Teknokent, Antalya, Turkey
+Contact: hello@goktigin.com
+Last updated: 2026-11-20
+
+## Products
+
+- [Art of Menu](https://artofmenu.com): Art of Menu runs QR menus, table ordering and pricing for restaurants and cafés. Owners manage menus, branches, tables and staff from one web panel, and prices can follow the hour and the weather.
+- [Chaput](https://chaput.app): Chaput is a women-first social app for goths. It isn't a dating app. Every profile is a tree, and men join after three women in the community approve them. Available on iOS and Android.
+- Benek: Benek connects pet owners with sitters they can trust. It is on hold while we focus on Art of Menu and Chaput.
+
+## Pages
+
+- [Göktigin (English)](https://goktigin.com/): studio overview, products, process, FAQ and contact
+- [Göktigin (Türkçe)](https://goktigin.com/tr/): the same page in Turkish
+
+## FAQ
+
+### What is Göktigin?
+
+Göktigin (Göktigin Bilişim Teknoloji Ltd. Şti.) is a software studio based in Antalya Teknokent, Turkey. It builds and runs its own products: Art of Menu, a QR menu and table ordering system for restaurants, and Chaput, a social app for iOS and Android.
+
+### What is Art of Menu?
+
+Art of Menu is restaurant software made by Göktigin. Guests scan a QR code at the table to read the menu, order and call a waiter. Owners manage menus, prices, branches, tables and staff from a web panel. Details are at artofmenu.com.
+
+### What is Chaput?
+
+Chaput is a women-first social app for goths, made by Göktigin for iOS and Android. It is not a dating app. Each profile is a tree that others can tie a chaput to, and men join after three women in the community approve them. Details are at chaput.app.
+
+### Where is Göktigin based?
+
+Göktigin is based at Antalya Teknokent, the technology park in Antalya, Turkey.
+
+### How do I contact Göktigin?
+
+Write to hello@goktigin.com. We reply by email.
