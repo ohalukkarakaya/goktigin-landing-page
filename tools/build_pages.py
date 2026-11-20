@@ -18,7 +18,7 @@ if "@" not in EMAIL:
 
 SITE = "https://goktigin.com"
 UPDATED_ISO = "2026-11-20"
-V = "14"  # cache-busting version for styles.css and script.js
+V = "22"  # cache-busting version for styles.css and script.js
 
 T = {
   "en": {
@@ -246,7 +246,6 @@ def page(t):
   <link rel="modulepreload" href="/script.js?v={V}">
   <link rel="modulepreload" href="/data.js">
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" crossorigin>
-  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/geometries/RoundedBoxGeometry.js" crossorigin>
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/environments/RoomEnvironment.js" crossorigin>
   <script type="application/ld+json">
 {jsonld(t)}

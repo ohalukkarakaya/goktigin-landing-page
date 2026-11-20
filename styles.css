@@ -352,7 +352,8 @@ address { font-style: normal; }
   .build[data-scene="artofmenu"], .build[data-scene="chaput"], .build[data-scene="benek"] {
     padding-top: calc(var(--box-top) + 54svh);
   }
-  #process { padding-top: calc(var(--box-top) + 50svh); }
+  /* the logo comes back together right after the last product, above this list */
+  #process { padding-top: calc(var(--box-top) + 46svh); }
   #faq { padding-top: 0; }
   /* one last clear look at the emblem before the contact card */
   #contact { padding-top: calc(var(--box-top) + 46svh); padding-bottom: 10svh; }

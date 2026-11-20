@@ -1,7 +1,6 @@
 // Göktigin landing: a 3D scene drawn as ASCII, where the characters come from
 // our own source code. Under the cursor a lens "compiles" them into the real render.
 import * as THREE from 'three';
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { CODE, EMBLEM } from './data.js';
 
@@ -70,13 +69,18 @@ async function main() {
   const device = new THREE.Group();
   scene.add(device);
   const DW = 1, DH = 2.05, DD = 0.1;
+  // a phone's corners are wide arcs, not a box's rounded edges: the outline is a rounded
+  // rectangle extruded to the depth, with a small bevel to soften the rim
+  const BODY_R = 0.16;
   const body = new THREE.Mesh(
-    new RoundedBoxGeometry(DW, DH, DD, 6, 0.13),
+    deviceBody(DW, DH, DD, BODY_R, 0.025),
     new THREE.MeshStandardMaterial({ color: 0x2a2622, metalness: 0.85, roughness: 0.3 }),
   );
   device.add(body);
 
   const SW = 0.92, SH = 1.97;
+  // the glass follows the body's curve, inset by the bezel (in screen-canvas pixels)
+  const SCREEN_R = Math.round(((BODY_R - (DW - SW) / 2) / SW) * 540);
   // every screen has two faces: the real UI (seen through the lens) and a line drawing of it
   // that the ASCII pass turns into characters
   const screens = {
@@ -126,11 +130,38 @@ async function main() {
     const p = new THREE.Vector3((x - 5) * VS, -(y + h / 2 - 5.75) * VS, 0);
     voxBase.push({ p, h });
     const dir = new THREE.Vector3(Math.sin(i * 12.9898) , Math.cos(i * 78.233), Math.sin(i * 3.7) * 0.6).normalize();
-    voxFrom.push(dir.multiplyScalar(2.2 + (i % 5) * 0.35));
+    voxFrom.push(dir);
     voxDelay.push(Math.min(p.length() / 1.2, 1) * 0.45);
     vox.setColorAt(i, new THREE.Color(hex).multiplyScalar(alpha * 1.6));
   });
   vox.instanceColor.needsUpdate = true;
+
+  // When the emblem comes apart it breaks into a few big chunks (the core and eight wedges
+  // around it) that float close by, around the device, and later fly back into place.
+  const N_CHUNKS = 9;
+  const center = new THREE.Vector3();
+  voxBase.forEach(({ p }) => center.add(p));
+  center.divideScalar(voxBase.length);
+  const voxChunk = voxBase.map(({ p }) => {
+    const dx = p.x - center.x, dy = p.y - center.y;
+    if (Math.hypot(dx, dy) < VS * 1.6) return 0;
+    return 1 + (Math.floor(((Math.atan2(dy, dx) + Math.PI) / (Math.PI * 2)) * 8) % 8);
+  });
+  const chunks = Array.from({ length: N_CHUNKS }, (_, c) => {
+    const rnd = (k) => { const v = Math.sin(c * 91.7 + k * 47.3) * 43758.5453; return v - Math.floor(v); };
+    return {
+      mid: new THREE.Vector3(), n: 0,
+      // a slow orbit on a wide ellipse around the device, some in front, some behind
+      a0: (c / N_CHUNKS) * Math.PI * 2 + rnd(1) * 0.5,
+      r: 1.75 + rnd(2) * 0.7, speed: (rnd(3) > 0.5 ? 1 : -1) * (0.05 + rnd(4) * 0.05),
+      z: -0.8 + rnd(5) * 1.4, bob: rnd(6) * 6.28,
+      axis: new THREE.Vector3(rnd(7) - 0.5, rnd(8) - 0.5, rnd(9) - 0.5).normalize(),
+      spin: 0.25 + rnd(10) * 0.4, delay: rnd(11) * 0.35,
+      pos: new THREE.Vector3(), rot: new THREE.Quaternion(),
+    };
+  });
+  voxBase.forEach(({ p }, i) => { const ch = chunks[voxChunk[i]]; ch.mid.add(p); ch.n++; });
+  chunks.forEach((ch) => { if (ch.n) ch.mid.divideScalar(ch.n); });
 
   // the hero: our star, with the products in orbit around it
   const orbit = new THREE.Group();
@@ -467,9 +498,9 @@ async function main() {
   let sceneAt = 0;
   const PRODUCTS = new Set(['artofmenu', 'chaput', 'benek']);
 
-  // Phones get the lens's payoff without having to find it: once a product sits still in view,
+  // Nobody has to find the lens to get its payoff: once a product sits still in view,
   // a scanline compiles its characters into the real screen, holds, then decompiles.
-  const autoReveal = touchFirst || innerWidth <= 820;
+  const autoReveal = true;
   const reveal = { p: 0, target: 0, clearSince: 0, until: 0, shown: null };
   const devRect = { x0: 0, y0: 0, x1: 0, y1: 0, ok: false }; // css px, top-left origin
   const hit = { at: 0, covered: false };
@@ -509,6 +540,8 @@ async function main() {
 
   let activeEl = document.querySelector('[data-scene]');
   const heroEl = document.querySelector('.hero') || activeEl;
+  // the logo forms above the process list and rides away with it; the FAQ keeps it there
+  const processEl = document.getElementById('process') || activeEl;
   let anchored = false;
   let lastScrollY = scrollY, scrollLean = 0;
   const io = new IntersectionObserver((entries) => {
@@ -576,13 +609,17 @@ async function main() {
     scrollLean += (THREE.MathUtils.clamp(vel / 2600, -0.45, 0.45) - scrollLean) * k(5);
 
     if (layout.mobile && activeEl) {
-      const hero = state.scene === 'hero';
+      const hero = state.scene === 'hero', end = state.scene === 'emblem';
+      // the hero and the ending carry the emblem in the space above their text;
+      // in between, the device sits pinned under the bar
       const cy = hero
         ? heroEl.getBoundingClientRect().top + layout.boxTop + layout.heroH / 2
-        : layout.boxTop + layout.pinH / 2;
+        : end
+          ? (activeEl.id === 'faq' ? processEl : activeEl).getBoundingClientRect().top + layout.boxTop + H * 0.23
+          : layout.boxTop + layout.pinH / 2;
       const ty = layout.halfH * (1 - (2 * cy) / H);
-      // glued to the page on the hero, eased while it hands over to the pinned spot
-      const rate = hero && now - sceneAt > 700 ? 40 : 6;
+      // glued to the page once settled, eased while it hands over
+      const rate = (hero || end) && now - sceneAt > 700 ? 40 : 6;
       layout.y = anchored ? layout.y + (ty - layout.y) * k(rate) : ty;
       anchored = true;
     }
@@ -605,22 +642,38 @@ async function main() {
       body.material.opacity = 1; screenMat.opacity = 1; back.material.opacity = 1;
     }
 
-    // emblem assembles from scattered voxels
-    const ev = Math.max(0, state.emblem);
-    emblem.visible = ev > 0.01;
+    // The emblem never really leaves: away from the hero and the ending its voxels come apart
+    // and wander the screen behind the device, then fly back together into the logo.
+    const ev = THREE.MathUtils.clamp(state.emblem, 0, 1);
+    emblem.visible = intro > 0.01;
     if (emblem.visible) {
       emblem.position.set(layout.x, layout.y, 0);
       emblem.scale.setScalar(layout.mobile
         ? THREE.MathUtils.lerp(layout.esPin, layout.es, THREE.MathUtils.clamp(state.orbit, 0, 1))
         : layout.s * (1.25 - 0.3 * Math.max(0, Math.min(1, state.orbit))));
-      emblem.rotation.set(-pointer.y * 0.3 + scrollLean * 0.8,layout.yaw * 0.6 + pointer.x * 0.6 + Math.sin(t * 0.45) * 0.35, 0);
+      emblem.rotation.set(-pointer.y * 0.3 + scrollLean * 0.8, layout.yaw * 0.6 + pointer.x * 0.6 + Math.sin(t * 0.45) * 0.35, 0);
+      const together = ev * intro;
+      // the ring's shape follows the screen: tall on phones, flatter beside the device on desktop
+      const ex = layout.mobile ? 0.82 : 1.0, ey = layout.mobile ? 1.15 : 0.72;
+      for (const ch of chunks) {
+        ch.e = easeInOut(THREE.MathUtils.clamp((together - ch.delay) / (1 - ch.delay), 0, 1));
+        const a = ch.a0 + t * ch.speed;
+        ch.pos.set(
+          Math.cos(a) * ch.r * ex,
+          Math.sin(a) * ch.r * ey + Math.sin(t * 0.6 + ch.bob) * 0.08 + scrollLean * 0.5,
+          ch.z,
+        );
+        ch.rot.setFromAxisAngle(ch.axis, (1 - ch.e) * (t * ch.spin + ch.bob));
+      }
       EMBLEM.forEach((_, i) => {
         const { p, h } = voxBase[i];
-        const e = easeOut(THREE.MathUtils.clamp((ev - voxDelay[i]) / (1 - voxDelay[i] * 0.9), 0, 1));
-        tmpV.copy(voxFrom[i]).multiplyScalar(1 - e).add(p);
-        tmpV.z += Math.sin(t * 1.3 + i) * 0.015;
-        tmpQ.setFromAxisAngle(voxFrom[i], (1 - e) * 2.5);
-        tmpS.set(VS * 0.93, VS * h * 0.93, VS * 0.93).multiplyScalar(0.2 + 0.8 * e);
+        const ch = chunks[voxChunk[i]];
+        // the voxel keeps its place inside its chunk; the chunk floats, turns, and flies home
+        tmpV.copy(p).sub(ch.mid).applyQuaternion(ch.rot).add(ch.pos).lerp(p, ch.e);
+        tmpV.z += Math.sin(Math.PI * ch.e) * 0.6;
+        tmpV.z += Math.sin(t * 1.3 + i) * 0.015 * ch.e;
+        tmpQ.copy(ch.rot);
+        tmpS.set(VS * 0.93, VS * h * 0.93, VS * 0.93);
         tmpM.compose(tmpV, tmpQ, tmpS);
         vox.setMatrixAt(i, tmpM);
       });
@@ -732,7 +785,7 @@ async function main() {
     c.width = w; c.height = h;
     const g = c.getContext('2d');
     g.save();
-    roundRect(g, 0, 0, w, h, rounded ? 58 : 66);
+    roundRect(g, 0, 0, w, h, SCREEN_R);
     g.clip();
     draw(g, w, h);
     g.restore();
@@ -815,6 +868,26 @@ function drawCover(g, img, w, h) {
   g.fillStyle = '#000';
   g.fillRect(0, 0, w, h);
   g.drawImage(img, (w - iw) / 2, (h - ih) / 2, iw, ih);
+}
+
+function deviceBody(w, h, d, r, b) {
+  const sw = w / 2 - b, sh = h / 2 - b, sr = r - b;
+  const shape = new THREE.Shape();
+  shape.moveTo(-sw + sr, -sh);
+  shape.lineTo(sw - sr, -sh);
+  shape.absarc(sw - sr, -sh + sr, sr, -Math.PI / 2, 0);
+  shape.lineTo(sw, sh - sr);
+  shape.absarc(sw - sr, sh - sr, sr, 0, Math.PI / 2);
+  shape.lineTo(-sw + sr, sh);
+  shape.absarc(-sw + sr, sh - sr, sr, Math.PI / 2, Math.PI);
+  shape.lineTo(-sw, -sh + sr);
+  shape.absarc(-sw + sr, -sh + sr, sr, Math.PI, Math.PI * 1.5);
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: d - 2 * b, bevelEnabled: true, bevelThickness: b, bevelSize: b, bevelSegments: 4, curveSegments: 16,
+  });
+  geo.translate(0, 0, -(d - 2 * b) / 2);
+  geo.computeVertexNormals();
+  return geo;
 }
 
 function roundRect(g, x, y, w, h, r) {
