@@ -42,6 +42,15 @@ async function main() {
   ]).catch(() => {});
   await Promise.race([fontsReady, new Promise((r) => setTimeout(r, 350))]);
 
+  /* ── phones run as an app shell (see styles.css): the pages scroll inside <main>,
+     the document never does, so the viewport and this canvas never resize mid-gesture ── */
+  const shellMQ = matchMedia('(max-width: 820px)');
+  const shell = shellMQ.matches;
+  // crossing the breakpoint swaps the whole page model; a reload is the honest way to do it
+  shellMQ.addEventListener?.('change', () => location.reload());
+  const scroller = shell ? document.querySelector('main') : null;
+  const scrollPos = () => (scroller ? scroller.scrollTop : scrollY);
+
   /* ── sizes ─────────────────────────────────────────── */
   let W = innerWidth, H = innerHeight;
   // Pixel ratio is capped at 1.5 (glyphs stay sharp, a third less fill work than 2x),
@@ -222,12 +231,13 @@ async function main() {
       uTime: { value: 0 },
       uScroll: { value: 0 },
       uScramble: { value: 1 },
+      uWave: { value: 0 },
     },
     vertexShader: fullscreen,
     fragmentShader: common + /* glsl */`
       uniform sampler2D tScene, tCode;
       uniform vec2 uGrid, uSpan;
-      uniform float uTime, uScroll, uScramble;
+      uniform float uTime, uScroll, uScramble, uWave;
       in vec2 vUv;
       out vec4 fragColor;
       // " .:-=+*#%@" as atlas indices (charCode - 32)
@@ -237,6 +247,11 @@ async function main() {
       void main() {
         vec2 cell = floor(gl_FragCoord.xy);
         vec2 cuv = (cell + 0.5) * uSpan;
+        // phones: the picture sways as if seen through water
+        if (uWave > 0.0) {
+          cuv.x += sin(cuv.y * 19.0 + uTime * 1.25) * 0.0085 * uWave;
+          cuv.y += sin(cuv.x * 13.0 + uTime * 0.85 + 1.7) * 0.005 * uWave;
+        }
         vec2 q = uSpan * 0.25;
         vec3 c = (sceneAt(cuv + vec2(-q.x, -q.y)) + sceneAt(cuv + vec2(q.x, -q.y))
                 + sceneAt(cuv + vec2(-q.x,  q.y)) + sceneAt(cuv + vec2(q.x,  q.y))) * 0.25;
@@ -414,18 +429,17 @@ async function main() {
       layout.mobile = false;
       layout.x = 0.4 * halfW; layout.y = -0.05; layout.s = Math.min((halfH * 1.36) / DH, (halfW * 0.62) / 1.1); layout.yaw = -0.28; layout.os = Math.min(layout.s * 0.82, ((halfW - layout.x) * 0.9) / R2);
     } else {
-      // phones (see styles.css, same numbers): the hero keeps a box at its top for the emblem,
-      // which scrolls away with it; after that the object is pinned under the bar and the
-      // cards slide up over it, so the screen is never half empty
+      // phones: each page keeps a box under the bar for the 3D object (styles.css uses the
+      // same fractions in dvh); the object rides with its page while you swipe between pages
       layout.mobile = true;
       layout.halfH = halfH;
-      layout.boxTop = (document.querySelector('.bar')?.getBoundingClientRect().bottom || 64) + 2;
-      layout.heroH = H * 0.34;
-      layout.pinH = H * 0.52;
+      layout.boxTop = (document.querySelector('.bar')?.getBoundingClientRect().bottom || 60) + 4;
       const world = (px) => (px / H) * 2 * halfH;
-      layout.s = Math.min((world(layout.pinH) * 0.92) / DH, (halfW * 2 * 0.62) / DW);
-      layout.es = Math.min((world(layout.heroH) * 0.9) / 2, (halfW * 2 * 0.6) / 2);
-      layout.esPin = Math.min((world(layout.pinH) * 0.62) / 2, (halfW * 2 * 0.62) / 2);
+      layout.s = Math.min((world(H * 0.44) * 0.92) / DH, (halfW * 2 * 0.62) / DW);
+      layout.es = Math.min((world(H * 0.31) * 0.88) / 2, (halfW * 2 * 0.6) / 2);
+      layout.esSmall = Math.min((world(H * 0.21) * 0.88) / 2, (halfW * 2 * 0.5) / 2);
+      layout.esPin = Math.min((world(H * 0.44) * 0.62) / 2, (halfW * 2 * 0.62) / 2);
+      layout.eScale ??= layout.es;
       layout.x = 0; layout.yaw = 0;
       layout.os = Math.min(layout.es * 0.82, (halfW * 0.94) / R2);
     }
@@ -446,7 +460,7 @@ async function main() {
   const LENS_R = touchFirst ? 92 : 118;
 
   addEventListener('pointermove', (e) => {
-    if (e.pointerType === 'touch') return;
+    if (e.pointerType === 'touch' || shell) return;
     pointer.tx = (e.clientX / W) * 2 - 1;
     pointer.ty = -((e.clientY / H) * 2 - 1);
     lens.x = e.clientX; lens.y = e.clientY;
@@ -457,13 +471,62 @@ async function main() {
 
   // Touch: the lens only opens on the open stage, never while reading or tapping a control.
   // A plain tap on the device replays the compile sweep.
-  const TEXTY = '.card, h1, .lede, .actions, .prompt, .hint, .bar, .foot, a, button';
-  const touch = { lens: false, moved: false, x: 0, y: 0 };
+  const TEXTY = '.card, h1, .lede, .actions, .prompt, .hint, .bar, .foot, a, button, .tabbar, .dots, .swipe-hint, .lens-handle';
+  const touch = { lens: false, tap: false, moved: false, x: 0, y: 0, t0: 0 };
+
+  // Phones have no hover, and holding a finger down to see the lens selects the text under it.
+  // So on phones the lens is an object: a tap on the stage drops it there and it stays; a drag
+  // that starts on it moves it 1:1 (the page doesn't scroll, nothing gets selected); a tap on
+  // it puts it away. It also goes away when the page changes.
+  const handle = shell ? document.createElement('div') : null;
+  const lensDrag = { on: false, ox: 0, oy: 0, sx: 0, sy: 0, moved: false };
+  function placeHandle() {
+    if (handle) handle.style.transform = `translate3d(${lens.x - LENS_R}px, ${lens.y - LENS_R}px, 0)`;
+  }
+  function openLens(x, y) {
+    lens.x = x; lens.y = y; lens.target = LENS_R;
+    handle?.classList.add('on');
+    placeHandle();
+    buzz?.();
+    poke();
+  }
+  function closeLens() {
+    lens.target = 0;
+    handle?.classList.remove('on');
+  }
+  if (handle) {
+    handle.className = 'lens-handle';
+    handle.setAttribute('aria-hidden', 'true');
+    handle.style.width = handle.style.height = `${LENS_R * 2}px`;
+    document.body.appendChild(handle);
+    handle.addEventListener('pointerdown', (e) => {
+      handle.setPointerCapture(e.pointerId);
+      Object.assign(lensDrag, { on: true, ox: e.clientX - lens.x, oy: e.clientY - lens.y, sx: e.clientX, sy: e.clientY, moved: false });
+      handle.classList.add('grab');
+    });
+    handle.addEventListener('pointermove', (e) => {
+      if (!lensDrag.on) return;
+      if (Math.hypot(e.clientX - lensDrag.sx, e.clientY - lensDrag.sy) > 6) lensDrag.moved = true;
+      // keep the grab offset, so the lens doesn't jump to centre itself under the finger
+      lens.x = THREE.MathUtils.clamp(e.clientX - lensDrag.ox, 0, W);
+      lens.y = THREE.MathUtils.clamp(e.clientY - lensDrag.oy, 0, H);
+      placeHandle();
+      poke();
+    });
+    const endDrag = () => {
+      if (lensDrag.on && !lensDrag.moved) closeLens();
+      lensDrag.on = false;
+      handle.classList.remove('grab');
+    };
+    handle.addEventListener('pointerup', endDrag);
+    handle.addEventListener('pointercancel', () => { lensDrag.on = false; handle.classList.remove('grab'); });
+  }
   addEventListener('touchstart', (e) => {
     const t = e.touches[0];
     if (!t) return;
-    touch.lens = !(e.target instanceof Element && e.target.closest(TEXTY));
-    touch.moved = false; touch.x = t.clientX; touch.y = t.clientY;
+    touch.tap = !(e.target instanceof Element && e.target.closest(TEXTY));
+    touch.lens = touch.tap && !shell;
+    touch.moved = false; touch.x = t.clientX; touch.y = t.clientY; touch.t0 = performance.now();
     clearTimeout(lensTimer);
     if (touch.lens) { lens.x = t.clientX; lens.y = t.clientY; lens.target = LENS_R; }
   }, { passive: true });
@@ -474,9 +537,17 @@ async function main() {
     if (touch.lens) { lens.x = t.clientX; lens.y = t.clientY; }
   }, { passive: true });
   addEventListener('touchend', () => {
+    if (shell) {
+      // a quick, still tap on the stage: the device compiles, anywhere else the lens drops in
+      if (!touch.moved && touch.tap && performance.now() - touch.t0 < 400) {
+        if (insideDevice(touch.x, touch.y)) { closeLens(); replayReveal(); }
+        else openLens(touch.x, touch.y);
+      }
+      return;
+    }
     clearTimeout(lensTimer);
     lensTimer = setTimeout(() => { lens.target = 0; }, 450);
-    if (!touch.moved && touch.lens && insideDevice(touch.x, touch.y)) {
+    if (!touch.moved && touch.tap && insideDevice(touch.x, touch.y)) {
       lens.target = 0;
       replayReveal();
     }
@@ -522,7 +593,7 @@ async function main() {
     state.orbT = name === 'hero' ? 1 : 0;
     if (name === 'hero' || name === 'emblem') { state.devT = 0; state.embT = 1; return; }
     state.devT = 1; state.embT = 0;
-    if (prev === 'emblem' || prev === 'hero' || state.device < 0.3) { current = name; spin = null; return; }
+    if (shell || prev === 'emblem' || prev === 'hero' || state.device < 0.3) { current = name; spin = null; return; }
     spin = { t0: performance.now(), to: name, swapped: false };
   }
   // Render budget: 30 fps while someone interacts, 15 fps when the page just idles,
@@ -530,7 +601,9 @@ async function main() {
   let activeUntil = 0, scrollingUntil = 0;
   function poke() { activeUntil = performance.now() + 1600; }
   addEventListener('pointermove', poke, { passive: true });
-  addEventListener('scroll', () => { poke(); scrollingUntil = performance.now() + 220; }, { passive: true });
+  const onScroll = () => { poke(); scrollingUntil = performance.now() + 220; };
+  addEventListener('scroll', onScroll, { passive: true });
+  scroller?.addEventListener('scroll', onScroll, { passive: true });
   addEventListener('touchmove', poke, { passive: true });
   addEventListener('wheel', poke, { passive: true });
   let focused = document.hasFocus();
@@ -543,11 +616,104 @@ async function main() {
   // the logo forms above the process list and rides away with it; the FAQ keeps it there
   const processEl = document.getElementById('process') || activeEl;
   let anchored = false;
-  let lastScrollY = scrollY, scrollLean = 0;
-  const io = new IntersectionObserver((entries) => {
-    for (const en of entries) if (en.isIntersecting) { activeEl = en.target; setScene(en.target.dataset.scene); }
-  }, { rootMargin: '-45% 0px -45% 0px' });
-  document.querySelectorAll('[data-scene]').forEach((el) => io.observe(el));
+  let lastScrollY = scrollPos(), scrollLean = 0;
+  if (!shell) {
+    const io = new IntersectionObserver((entries) => {
+      for (const en of entries) if (en.isIntersecting) { activeEl = en.target; setScene(en.target.dataset.scene); }
+    }, { rootMargin: '-45% 0px -45% 0px' });
+    document.querySelectorAll('[data-scene]').forEach((el) => io.observe(el));
+  }
+
+  // Phones: five snapping pages. Each knows its stage box (fraction of the height, as in
+  // styles.css) and what stands in it. The products page holds a sideways slider.
+  const PAGES = shell ? [
+    { el: document.querySelector('.hero'), box: 0.31, tab: -1 },
+    { el: document.getElementById('products'), box: 0.44, tab: 0 },
+    { el: document.getElementById('process'), box: 0.21, tab: 1 },
+    { el: document.getElementById('faq'), box: 0.21, tab: 2 },
+    { el: document.getElementById('contact'), box: 0.31, tab: 3 },
+  ].filter((pg) => pg.el) : [];
+  const slides = document.querySelector('.slides');
+  const slideEls = slides ? [...slides.querySelectorAll('[data-scene]')] : [];
+  const dots = [...document.querySelectorAll('.dots i')];
+  const tabbar = document.querySelector('.tabbar');
+  const tabs = tabbar ? [...tabbar.querySelectorAll('a')] : [];
+  let page = PAGES[0] || null;
+  const slide = { p: 0, idx: 0 };
+  // a tick on snaps, only once the visitor has touched the page (browsers refuse it before)
+  const buzz = () => { if (navigator.userActivation?.hasBeenActive) try { navigator.vibrate?.(6); } catch (e) {} };
+
+  function slideProgress() {
+    if (!slides || slideEls.length < 2) return 0;
+    const step = slideEls[1].offsetLeft - slideEls[0].offsetLeft || 1;
+    return THREE.MathUtils.clamp(slides.scrollLeft / step, 0, slideEls.length - 1);
+  }
+  function sceneFor(pg) {
+    if (pg.el.classList.contains('hero')) return 'hero';
+    if (pg.el.id === 'products') return slideEls[slide.idx]?.dataset.scene || 'artofmenu';
+    return 'emblem';
+  }
+  function showTab(pg) {
+    if (!tabbar) return;
+    tabbar.style.setProperty('--pill-o', pg.tab < 0 ? '0' : '1');
+    if (pg.tab >= 0) tabbar.style.setProperty('--tab', String(pg.tab));
+    tabs.forEach((a, i) => { a.classList.toggle('on', i === pg.tab); if (i === pg.tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  }
+  if (shell && scroller) {
+    const pio = new IntersectionObserver((entries) => {
+      for (const en of entries) {
+        if (!en.isIntersecting) continue;
+        const pg = PAGES.find((x) => x.el === en.target);
+        if (!pg || pg === page) continue;
+        page = pg; activeEl = pg.el;
+        closeLens();
+        showTab(pg); buzz();
+        setScene(sceneFor(pg));
+      }
+    }, { root: scroller, threshold: 0.55 });
+    PAGES.forEach((pg) => pio.observe(pg.el));
+    showTab(page);
+
+    // in-page links (tab bar, brand, hero button) scroll the page scroller, not the document
+    document.addEventListener('click', (e) => {
+      const a = e.target instanceof Element && e.target.closest('a[href^="#"]');
+      if (!a) return;
+      const id = a.getAttribute('href').slice(1);
+      const target = id === 'top' ? PAGES[0]?.el : document.getElementById(id);
+      if (!target || !scroller.contains(target)) return;
+      e.preventDefault();
+      scroller.scrollTo({ top: target.offsetTop, behavior: reduced ? 'auto' : 'smooth' });
+    });
+
+    // products: the slider drives the dots; the device follows it in the frame loop
+    slides?.addEventListener('scroll', () => {
+      poke();
+      const idx = Math.round(slideProgress());
+      if (idx !== slide.idx) {
+        slide.idx = idx;
+        dots.forEach((d, i) => d.classList.toggle('on', i === idx));
+        buzz();
+      }
+    }, { passive: true });
+    dots[0]?.classList.add('on');
+
+    // FAQ as an accordion: one answer open at a time
+    const qas = [...document.querySelectorAll('.faq .qa')];
+    qas.forEach((qa) => {
+      const dt = qa.querySelector('dt');
+      if (!dt) return;
+      dt.setAttribute('role', 'button');
+      dt.setAttribute('tabindex', '0');
+      dt.setAttribute('aria-expanded', 'false');
+      const toggle = () => {
+        const open = !qa.classList.contains('open');
+        qas.forEach((o) => { o.classList.remove('open'); o.querySelector('dt')?.setAttribute('aria-expanded', 'false'); });
+        if (open) { qa.classList.add('open'); dt.setAttribute('aria-expanded', 'true'); }
+      };
+      dt.addEventListener('click', toggle);
+      dt.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    });
+  }
 
   /* ── loop ──────────────────────────────────────────── */
   const t0 = performance.now();
@@ -567,7 +733,8 @@ async function main() {
     const busy = now < activeUntil || spin || intro < 1 || lens.r > 1 || reveal.p > 0
       || Math.abs(state.device - state.devT) > 0.02 || Math.abs(state.emblem - state.embT) > 0.02;
     // on phones the hero emblem rides along with the page, so it keeps pace with the scroll
-    const budget = layout.mobile && now < scrollingUntil ? 15 : !focused && !busy ? 120 : busy ? 32 : 64;
+    // phones: the water never stops, so idle there is 30 fps rather than 15
+    const budget = layout.mobile && now < scrollingUntil ? 15 : layout.mobile ? 32 : !focused && !busy ? 120 : busy ? 32 : 64;
     if (now - last < budget) { requestAnimationFrame(frame); return; }
     // frames that keep arriving far later than asked mean the GPU is struggling: drop to 1x
     if (busy && dprCap > 1 && (devicePixelRatio || 1) > 1) {
@@ -602,36 +769,81 @@ async function main() {
     }
     scramble = Math.max(scramble, Math.sin(Math.PI * Math.min(state.emblem, 1)) * 0.35);
 
+    // phones: the slider's position turns the device with the finger, and the screen
+    // changes exactly when it is edge-on (half a slide)
+    if (shell && page && page.el.id === 'products' && slides) {
+      slide.p = slideProgress();
+      const idx = Math.round(slide.p);
+      const name = slideEls[idx]?.dataset.scene;
+      if (name && name !== state.scene) setScene(name);
+      if (name) current = name;
+      const off = slide.p - idx;
+      extra = reduced ? 0 : off * Math.PI;
+      scramble = Math.max(scramble, Math.min(1, Math.abs(off) * 2) * 0.55);
+    }
+
     // scrolling leans the device and the emblem, as if they had a little weight
-    const sy = scrollY;
+    const sy = scrollPos();
     const vel = (sy - lastScrollY) / Math.max(dt, 1 / 120);
     lastScrollY = sy;
     scrollLean += (THREE.MathUtils.clamp(vel / 2600, -0.45, 0.45) - scrollLean) * k(5);
 
-    if (layout.mobile && activeEl) {
-      const hero = state.scene === 'hero', end = state.scene === 'emblem';
-      // the hero and the ending carry the emblem in the space above their text;
-      // in between, the device sits pinned under the bar
-      const cy = hero
-        ? heroEl.getBoundingClientRect().top + layout.boxTop + layout.heroH / 2
-        : end
-          ? (activeEl.id === 'faq' ? processEl : activeEl).getBoundingClientRect().top + layout.boxTop + H * 0.23
-          : layout.boxTop + layout.pinH / 2;
+    if (layout.mobile && page) {
+      // The page's text sits right above the tab bar; the stage is whatever is left between
+      // the top bar and that text, measured live, so no phone height leaves a hole.
+      // The object rides with its page; while the scene hands over it glides to the new spot.
+      const top = page.el.getBoundingClientRect().top;
+      const first = page.el.firstElementChild?.classList.contains('sr-only')
+        ? page.el.children[1] : page.el.firstElementChild;
+      const contentTop = first ? first.getBoundingClientRect().top : top + H * 0.5;
+      const boxH = THREE.MathUtils.clamp(contentTop - top - layout.boxTop, H * 0.16, H * 0.58);
+      const cy = top + layout.boxTop + boxH / 2;
       const ty = layout.halfH * (1 - (2 * cy) / H);
-      // glued to the page once settled, eased while it hands over
-      const rate = (hero || end) && now - sceneAt > 700 ? 40 : 6;
+      const rate = now - sceneAt > 700 ? 40 : 7;
       layout.y = anchored ? layout.y + (ty - layout.y) * k(rate) : ty;
+      const world = (boxH / H) * 2 * layout.halfH;
+      const halfW = layout.halfH * camera.aspect;
+      const products = page.el.id === 'products';
+      const sT = Math.min((world * 0.9) / DH, (halfW * 2 * 0.62) / DW);
+      const hero = page.el.classList.contains('hero');
+      // the logo is drawn big: on the card pages its lower part may sink under the card,
+      // on the hero (bare text, no card) it stays inside its box
+      const eT = products
+        ? Math.min((world * 0.62) / 2, (halfW * 2 * 0.62) / 2)
+        : hero
+          ? Math.min((world * 1.0) / 2, (halfW * 2 * 0.72) / 2)
+          : Math.min((world * 1.32) / 2, (halfW * 2 * 0.86) / 2);
+      const eyT = products || hero ? ty : layout.halfH * (1 - (2 * (top + layout.boxTop + boxH * 0.62)) / H);
+      const kk = anchored ? k(rate === 40 ? 12 : 5) : 1;
+      layout.s += (sT - layout.s) * kk;
+      layout.eScale += (eT - layout.eScale) * kk;
+      layout.ey = anchored && layout.ey != null ? layout.ey + (eyT - layout.ey) * k(rate) : eyT;
+      layout.os = Math.min(layout.eScale * 0.82, (halfW * 0.94) / R2);
       anchored = true;
     }
+
+    // phones: everything floats a little on its own, as if hanging in water
+    const fl = layout.mobile && !reduced ? 1 : 0;
+    const drift = {
+      x: fl * (Math.sin(t * 0.31) * 0.05 + Math.sin(t * 0.73 + 1.3) * 0.02),
+      y: fl * (Math.sin(t * 0.47 + 0.6) * 0.07 + Math.sin(t * 1.1) * 0.015),
+      rx: fl * Math.sin(t * 0.53 + 2) * 0.09,
+      ry: fl * Math.sin(t * 0.29) * 0.14,
+      rz: fl * Math.sin(t * 0.39) * 0.07,
+    };
 
     const dv = easeOut(Math.max(0, state.device) * intro);
     device.visible = dv > 0.01;
     device.scale.setScalar(layout.s * (0.6 + 0.4 * dv));
-    device.position.set(layout.x, layout.y + Math.sin(t * 0.8) * 0.04 - (1 - dv) * 0.6, 0);
+    device.position.set(
+      layout.x + drift.x * layout.s,
+      layout.y + Math.sin(t * 0.8) * 0.04 - (1 - dv) * 0.6 + drift.y * layout.s,
+      0,
+    );
     device.rotation.set(
-      -pointer.y * 0.28 + Math.sin(t * 0.5) * 0.04 + scrollLean,
-      layout.yaw + pointer.x * 0.5 + Math.sin(t * 0.35) * 0.16 + extra,
-      Math.sin(t * 0.4) * 0.02,
+      -pointer.y * 0.28 + Math.sin(t * 0.5) * 0.04 + scrollLean + drift.rx * 0.6,
+      layout.yaw + pointer.x * 0.5 + Math.sin(t * 0.35) * 0.16 + extra + drift.ry * 0.5,
+      Math.sin(t * 0.4) * 0.02 + drift.rz * 0.5,
     );
     body.material.opacity = 1;
     device.traverse((o) => { if (o.material) o.material.visible = dv > 0.01; });
@@ -647,11 +859,18 @@ async function main() {
     const ev = THREE.MathUtils.clamp(state.emblem, 0, 1);
     emblem.visible = intro > 0.01;
     if (emblem.visible) {
-      emblem.position.set(layout.x, layout.y, 0);
+      const embY = layout.mobile ? layout.ey ?? layout.y : layout.y;
+      // desktop has no eScale (and no drift); never let it turn the position into NaN
+      const eS = layout.mobile ? layout.eScale ?? 0 : 0;
+      emblem.position.set(layout.x + drift.x * eS * 1.6, embY + drift.y * eS * 1.6, 0);
       emblem.scale.setScalar(layout.mobile
-        ? THREE.MathUtils.lerp(layout.esPin, layout.es, THREE.MathUtils.clamp(state.orbit, 0, 1))
+        ? layout.eScale
         : layout.s * (1.25 - 0.3 * Math.max(0, Math.min(1, state.orbit))));
-      emblem.rotation.set(-pointer.y * 0.3 + scrollLean * 0.8, layout.yaw * 0.6 + pointer.x * 0.6 + Math.sin(t * 0.45) * 0.35, 0);
+      emblem.rotation.set(
+        -pointer.y * 0.3 + scrollLean * 0.8 + drift.rx,
+        layout.yaw * 0.6 + pointer.x * 0.6 + Math.sin(t * 0.45) * 0.35 + drift.ry,
+        drift.rz,
+      );
       const together = ev * intro;
       // the ring's shape follows the screen: tall on phones, flatter beside the device on desktop
       const ex = layout.mobile ? 0.82 : 1.0, ey = layout.mobile ? 1.15 : 0.72;
@@ -701,8 +920,9 @@ async function main() {
 
     const cu = cellMat.uniforms;
     cu.uTime.value = t;
-    cu.uScroll.value = (reduced ? 0 : t * 1.6) + scrollY / (cellH / dpr) * 0.35;
+    cu.uScroll.value = (reduced ? 0 : t * 1.6) + sy / (cellH / dpr) * 0.35;
     cu.uScramble.value = scramble;
+    cu.uWave.value = fl;
     const u = post.uniforms;
     u.uLens.value = lens.r < 1 ? 0 : lens.r * dpr;
     u.uMouse.value.set(lens.x * dpr, (H - lens.y) * dpr);
@@ -723,6 +943,7 @@ async function main() {
     if (autoReveal) {
       // the device has to be fully in the clear: nothing scrolled over it, not mid-swap
       let clear = PRODUCTS.has(state.scene) && !spin && current === state.scene && devRect.ok && !!screens[current].real;
+      if (clear && shell) clear = page?.el.id === 'products' && Math.abs(page.el.getBoundingClientRect().top) < 3 && Math.abs(slide.p - Math.round(slide.p)) < 0.01;
       if (clear) {
         // hit-testing is cheap but not free: look again at most every 150 ms
         if (now - hit.at > 150) {

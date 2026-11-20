@@ -18,7 +18,7 @@ if "@" not in EMAIL:
 
 SITE = "https://goktigin.com"
 UPDATED_ISO = "2026-11-20"
-V = "22"  # cache-busting version for styles.css and script.js
+V = "29"  # cache-busting version for styles.css and script.js
 
 T = {
   "en": {
@@ -36,6 +36,7 @@ T = {
     "cta": "See our products",
     "hint_desktop": "Move your cursor over the characters. Under the lens they turn back into the real screen.",
     "hint_touch": "Touch and drag over the characters. Under the lens they turn back into the real screen.",
+    "swipe_hint": "Swipe for the next product · tap the phone to compile it",
     "products_h": "Our products",
     "aom_tag": "New",
     "aom_p": "Art of Menu runs QR menus, table ordering and pricing for restaurants and cafés. Owners manage menus, branches, tables and staff from one web panel, and prices can follow the hour and the weather.",
@@ -88,6 +89,7 @@ T = {
     "cta": "Ürünlerimiz",
     "hint_desktop": "İmleci karakterlerin üzerinde gezdirin. Merceğin altında gerçek ekran görünür.",
     "hint_touch": "Karakterlere dokunup sürükleyin. Merceğin altında gerçek ekran görünür.",
+    "swipe_hint": "Diğer ürün için kaydır · derlemek için telefona dokun",
     "products_h": "Ürünlerimiz",
     "aom_tag": "Yeni",
     "aom_p": "Art of Menu, restoran ve kafeler için QR menü, masadan sipariş ve fiyatlandırma sistemi. İşletme sahibi menüleri, şubeleri, masaları ve çalışanları tek bir web panelinden yönetir. Fiyatlar saate ve havaya göre değişebilir.",
@@ -284,7 +286,8 @@ def page(t):
       <p class="hint"><span class="lens-dot"></span><span class="hint-desktop">{e(t['hint_desktop'])}</span><span class="hint-touch">{e(t['hint_touch'])}</span></p>
     </section>
 
-    <div id="products" class="anchor"></div>
+    <div id="products" class="products">
+    <div class="slides">
     <h2 class="sr-only">{e(t['products_h'])}</h2>
 
     <section class="panel build" data-scene="artofmenu" aria-labelledby="p-aom">
@@ -327,6 +330,10 @@ def page(t):
 <span class="warn">‖</span> {e(t['benek_term'])}</pre>
       </article>
     </section>
+    </div>
+    <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+    <p class="swipe-hint">{e(t['swipe_hint'])}</p>
+    </div>
 
     <section id="process" class="panel build" data-scene="emblem">
       <p class="prompt"><span class="dim">$</span> git log --oneline --reverse</p>
@@ -357,8 +364,6 @@ def page(t):
         <address class="addr">{e(t['addr'])}</address>
       </div>
     </section>
-  </main>
-
   <footer class="foot">
     <figure class="motto">
       <blockquote lang="tr"><p>“Yurt sevgisi ona hizmetle ölçülür.”</p>{f'<p class="motto-en" lang="en">{e(t["motto_en"])}</p>' if t["motto_en"] else ''}</blockquote>
@@ -370,6 +375,15 @@ def page(t):
       <a href="mailto:{mail}">{mail}</a>
     </div>
   </footer>
+  </main>
+  <nav class="tabbar" aria-label="Sections">
+    <i class="tab-pill" aria-hidden="true"></i>
+    <a href="#products" data-tab="products"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="3" width="11" height="18" rx="2.6"/><path d="M10.5 6h3"/></svg><span>{nav[0]}</span></a>
+    <a href="#process" data-tab="process"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4.5M12 16.5V21"/><circle cx="12" cy="12" r="4.5"/></svg><span>{nav[1]}</span></a>
+    <a href="#faq" data-tab="faq"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 6.5a2.5 2.5 0 0 1 2.5-2.5h10a2.5 2.5 0 0 1 2.5 2.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 3.5V16H7a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M12 13h.01M10.2 8.6a1.9 1.9 0 1 1 2.6 1.8c-.5.2-.8.6-.8 1.1"/></svg><span>{nav[2]}</span></a>
+    <a href="#contact" data-tab="contact"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.4"/><path d="m4.5 7 7.5 6 7.5-6"/></svg><span>{nav[3]}</span></a>
+  </nav>
+
 
   <script type="module" src="/script.js?v={V}"></script>
 </body>

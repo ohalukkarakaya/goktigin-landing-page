@@ -333,66 +333,309 @@ address { font-style: normal; }
 }
 .js-rise .build .in { opacity: 1; transform: none; }
 
-/* ── small screens ──────────────────────────────────────
-   The numbers match script.js (layout.boxTop / heroH / pinH):
-   the hero keeps 34svh under the bar for the emblem and scrolls it away;
-   after that the object is pinned in the top 52svh and each card slides up over it. */
+/* desktop: the mobile wrappers are plain blocks and the mobile-only chrome stays hidden */
+.products, .slides { display: block; }
+.tabbar, .dots, .swipe-hint { display: none; }
+
+/* ── phones: an app shell ─────────────────────────────────
+   The document itself never scrolls, so iOS keeps its toolbars still and the viewport
+   (and the WebGL canvas) never resizes mid-gesture. The pages live in one snapping
+   scroller; the products are a sideways slider; a floating tab bar gets you anywhere.
+   The stage boxes (dvh fractions) match script.js MOBILE_BOX. */
 @media (max-width: 820px) {
-  :root { --box-top: calc(max(16px, env(safe-area-inset-top, 0px)) + 50px); }
+  :root {
+    --bar-h: calc(max(14px, env(safe-area-inset-top, 0px)) + 48px);
+    --tab-h: calc(78px + env(safe-area-inset-bottom, 0px));
+  }
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
   body { font-size: 16px; }
+  #stage { touch-action: auto; }
+
+  main {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  main::-webkit-scrollbar { display: none; }
+
+  .hero, .products, #process, #faq, #contact {
+    position: relative;
+    min-height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  .panel {
+    max-width: none;
+    min-height: 0;
+    justify-content: flex-start;
+    padding: 0 20px;
+  }
+
+  /* top bar: solid, with a soft edge instead of a hard line */
   .links { display: none; }
   .lang { margin-left: auto; }
-  .bar { gap: 10px; }
-  .panel { min-height: 0; justify-content: flex-start; padding-bottom: 12svh; }
-  .hero {
-    min-height: 100svh;
-    padding-top: calc(var(--box-top) + 34svh + 6px);
-    padding-bottom: 40px;
-  }
-  .build[data-scene="artofmenu"], .build[data-scene="chaput"], .build[data-scene="benek"] {
-    padding-top: calc(var(--box-top) + 54svh);
-  }
-  /* the logo comes back together right after the last product, above this list */
-  #process { padding-top: calc(var(--box-top) + 46svh); }
-  #faq { padding-top: 0; }
-  /* one last clear look at the emblem before the contact card */
-  #contact { padding-top: calc(var(--box-top) + 46svh); padding-bottom: 10svh; }
-  .hero h1 { font-size: clamp(34px, 9.6vw, 54px); overflow-wrap: break-word; }
-  .hero .lede { font-size: 16px; margin-top: 18px; }
-  .hero .actions { margin-top: 26px; }
-  .hero .actions .btn { flex: 1 1 auto; text-align: center; }
-  .hint { margin-top: 26px; }
-  .hero .lede, .prompt { text-shadow: 0 0 18px var(--bg), 0 0 6px var(--bg), 0 0 2px var(--bg); }
-  /* no backdrop blur over a live canvas on phones: it re-blurs every frame */
-  .card {
-    padding: 22px 18px 18px;
-    background: rgba(11, 10, 9, 0.97);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    box-shadow: 0 -24px 48px -12px rgba(11, 10, 9, 0.9);
-  }
-  .term { font-size: 11px; letter-spacing: -0.01em; }
-  /* the bar gets its own backdrop so scrolled text never runs under the logo */
   .bar {
-    padding-top: max(16px, env(safe-area-inset-top));
-    padding-bottom: 14px;
+    gap: 10px;
+    padding: max(14px, env(safe-area-inset-top)) 20px 10px;
     background: var(--bg);
   }
   .bar::after {
     content: "";
     position: absolute;
     left: 0; right: 0; top: 100%;
-    height: 28px;
+    height: 22px;
     background: linear-gradient(var(--bg), rgba(11, 10, 9, 0));
     pointer-events: none;
   }
-  .log li { grid-template-columns: 1fr; gap: 2px; }
+
+  /* ── hero ── */
+  /* every page: its words sit just above the tab bar, and whatever height is left
+     above them (never less than a minimum) becomes the stage, measured by script.js */
+  .hero, #process, #faq, #contact { justify-content: flex-end; }
+  .hero {
+    display: flex;
+    min-height: 100%;
+    padding-top: calc(var(--bar-h) + 26dvh);
+    padding-bottom: calc(var(--tab-h) + 10px);
+  }
+  .hero .prompt { margin-bottom: 14px; }
+  .hero h1 { font-size: clamp(32px, 9.2vw, 46px); line-height: 1; overflow-wrap: break-word; }
+  .hero .lede { font-size: 15px; line-height: 1.5; margin-top: 14px; }
+  .hero .actions { margin-top: 22px; gap: 10px; flex-wrap: nowrap; }
+  .hero .actions .btn { flex: 1 1 0; min-width: 0; text-align: center; padding: 15px 10px; border-radius: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hint { display: none; }
+  .hero .lede, .prompt { text-shadow: 0 0 18px var(--bg), 0 0 6px var(--bg), 0 0 2px var(--bg); }
+
+  /* ── products: the device up top, a sideways slider of cards below ── */
+  .products {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: calc(var(--bar-h) + 36dvh) 0 calc(var(--tab-h) + 4px);
+  }
+  .products .slides {
+    display: flex;
+    gap: 3vw;
+    padding: 0 7vw;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .products .slides::-webkit-scrollbar { display: none; }
+  .products .build {
+    flex: 0 0 86vw;
+    display: flex;
+    padding: 0;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+  }
+  .products .build .prompt { display: none; }
+  .products .card { flex: 1; display: flex; flex-direction: column; }
+  .products .card { padding: 18px 18px 16px; }
+  /* the full text stays in the page (and for search); the card shows the gist */
+  .products .card > p {
+    font-size: 14.5px; line-height: 1.45; margin-top: 8px; flex: 1;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden;
+  }
+  @media (max-height: 720px) { .products .card > p { -webkit-line-clamp: 3; line-clamp: 3; } }
+  .products h3 { font-size: 21px; }
+  /* the terminal lines shrink away; only its link stays, as a pill button */
+  .products .term { font-size: 0; line-height: 0; margin: 14px 0 0; padding: 0; border: 0; }
+  .products .term a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    line-height: 1;
+    padding: 11px 16px;
+    border: 1px solid rgba(236, 230, 220, 0.22);
+    border-radius: 999px;
+  }
+  .products .term a::after { content: "↗"; color: var(--red); }
+  .products .term a:active { background: rgba(236, 230, 220, 0.08); color: var(--ink); }
+  .products [data-scene="benek"] .term { display: none; }
+  .dots { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
+  .dots i {
+    width: 6px; height: 6px;
+    border-radius: 3px;
+    background: rgba(236, 230, 220, 0.22);
+    transition: width 320ms cubic-bezier(0.2, 0.8, 0.2, 1), background-color 320ms ease;
+  }
+  .dots i.on { width: 20px; background: var(--ink); }
+  .swipe-hint {
+    display: block;
+    margin: 6px 20px 0;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+  }
+
+  /* ── cards: rounder, solid (no blur over a live canvas) ── */
+  .card {
+    padding: 20px 18px 18px;
+    border-radius: 20px;
+    background: rgba(19, 17, 15, 0.94);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .card h2 { font-size: 24px; }
+
+  /* ── process ── */
+  #process { padding-top: calc(var(--bar-h) + 17dvh); padding-bottom: calc(var(--tab-h) + 10px); }
+  .log { margin-top: 12px; }
+  .log li { grid-template-columns: 62px 1fr; gap: 8px; padding: 10px 0; font-size: 14.5px; line-height: 1.45; }
+  .log code { font-size: 11.5px; }
+
+  /* ── faq: an accordion, one answer open at a time ── */
+  #faq { padding-top: calc(var(--bar-h) + 17dvh); padding-bottom: calc(var(--tab-h) + 10px); }
+  .faq { margin-top: 6px; }
+  .faq .qa { padding: 0; }
+  .faq dt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 0;
+    font-size: 15.5px;
+    line-height: 1.3;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .faq dt::after {
+    content: "";
+    flex: none;
+    width: 8px; height: 8px;
+    margin-top: -4px;
+    border-right: 1.5px solid var(--soft);
+    border-bottom: 1.5px solid var(--soft);
+    transform: rotate(45deg);
+    transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), margin 300ms;
+  }
+  .faq .open dt::after { transform: rotate(225deg); margin-top: 4px; }
+  .faq dd {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.5;
+    transition: max-height 340ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 220ms ease, padding 340ms;
+  }
+  .faq .open dd { max-height: 16em; opacity: 1; padding-bottom: 14px; }
+
+  /* ── contact + footer close the list ── */
+  #contact { padding-top: calc(var(--bar-h) + 24dvh); padding-bottom: calc(var(--tab-h) + 10px); }
+  .foot {
+    scroll-snap-align: end;
+    background: transparent;
+    border-top: 1px solid var(--line);
+    gap: 16px;
+    padding: 22px 20px calc(var(--tab-h) + 14px);
+  }
+  .foot-row { flex-direction: column; gap: 6px; }
+
+  /* ── tab bar: a floating material, like an installed app ── */
+  .tabbar {
+    display: flex;
+    position: fixed;
+    z-index: 20;
+    left: 12px; right: 12px;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    height: 60px;
+    padding: 5px;
+    border-radius: 22px;
+    background: rgba(24, 21, 19, 0.72);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(236, 230, 220, 0.09);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(236, 230, 220, 0.06);
+  }
+  .tabbar a {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    color: var(--dim);
+    transition: color 220ms ease;
+  }
+  .tabbar svg {
+    width: 21px; height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 140ms ease-out;
+  }
+  .tabbar a:active svg { transform: scale(0.88); }
+  .tabbar a.on { color: var(--ink); }
+  .tabbar a.on svg { stroke: var(--red); }
+  .tab-pill {
+    position: absolute;
+    top: 5px; bottom: 5px; left: 5px;
+    width: calc((100% - 10px) / 4);
+    border-radius: 17px;
+    background: rgba(236, 230, 220, 0.08);
+    opacity: var(--pill-o, 0);
+    transform: translateX(calc(var(--tab, 0) * 100%));
+    transition: transform 460ms cubic-bezier(0.3, 1.2, 0.4, 1), opacity 240ms ease;
+  }
+
+  /* the phone lens: an invisible disc over the ring the shader draws, so it can be grabbed */
+  .lens-handle {
+    display: none;
+    position: fixed;
+    left: 0; top: 0;
+    z-index: 15;
+    border-radius: 50%;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    cursor: grab;
+  }
+  .lens-handle.on { display: block; }
+  .lens-handle.grab { cursor: grabbing; }
+  /* a small grip on the rim says "drag me" */
+  .lens-handle::after {
+    content: "";
+    position: absolute;
+    left: 50%; bottom: 7px;
+    width: 26px; height: 4px;
+    margin-left: -13px;
+    border-radius: 2px;
+    background: var(--red);
+    opacity: 0.85;
+    transition: transform 140ms ease-out;
+  }
+  .lens-handle.grab::after { transform: scaleX(1.35); }
+
   /* without the 3D stage there is nothing to keep room for */
-  .no-stage .panel { padding-top: 96px; }
+  .no-stage .hero, .no-stage .products, .no-stage #process, .no-stage #faq, .no-stage #contact { padding-top: calc(var(--bar-h) + 24px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
+  html, main { scroll-behavior: auto; }
+  .tab-pill, .dots i, .faq dd { transition: none; }
   .hero > * { animation: none; }
   .caret, .flag i { animation: none; }
 }
